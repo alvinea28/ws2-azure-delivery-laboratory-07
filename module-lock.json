@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "repository": "alvinea28/ws2-azure-delivery-laboratory-07",
+  "revision": "4414e56b409a46785590741adcc48abea29905d7",
+  "subdirectory": "module",
+  "source": "git::https://github.com/alvinea28/ws2-azure-delivery-laboratory-07.git//module?ref=4414e56b409a46785590741adcc48abea29905d7",
+  "provenanceStatus": "verified-git-export",
+  "normalization": "UTF-8 text with CRLF normalized to LF; EOF is preserved",
+  "files": [
+    {
+      "path": "main.tf",
+      "sha256": "7bc2e717be507fd7f926bfd94c53129c1657149272bc84a305464d5a64276f42"
+    },
+    {
+      "path": "modules/subnet-security/main.tf",
+      "sha256": "fc420b0ff68e093f0551efb977e84bd4233fc8d5ff8413ba257afa2024aef155"
+    },
+    {
+      "path": "modules/subnet-security/outputs.tf",
+      "sha256": "b9235ffb1a8f6c095254e873a2176b0bd0fc6eec1171f303fc3c394ead842c19"
+    },
+    {
+      "path": "modules/subnet-security/variables.tf",
+      "sha256": "cb993a41164273374573c0319f742919ea0571fbd916f521563e8bbbd7ff807d"
+    },
+    {
+      "path": "modules/subnet-security/versions.tf",
+      "sha256": "7422d4fbf91a0a83594836db8ba64752e0e17fe5c37355de1cee259133969df5"
+    },
+    {
+      "path": "outputs.tf",
+      "sha256": "28ce330120259c21077f09870d4068fcd16c3a18405309ce38f31dbcc5c7629c"
+    },
+    {
+      "path": "variables.tf",
+      "sha256": "0f5e7022eb7d99997a4403d3053b93181145998dfafb0274e5fa579917f996ba"
+    },
+    {
+      "path": "versions.tf",
+      "sha256": "7422d4fbf91a0a83594836db8ba64752e0e17fe5c37355de1cee259133969df5"
+    }
+  ]
+}

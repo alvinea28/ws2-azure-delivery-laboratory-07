@@ -1,0 +1,5 @@
+# Static recognition only. The instructor still enforces allowed-workflow
+# runner-group access; a label is not an authorization boundary.
+self-hosted-runner:
+  labels:
+    - ws2-trusted

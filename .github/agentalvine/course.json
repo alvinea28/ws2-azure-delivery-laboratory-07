@@ -1,0 +1,129 @@
+{
+  "id": "07-azure-delivery",
+  "title": "Laboratory 07 · Azure delivery controls and identity",
+  "number": 7,
+  "repeatOnChange": [
+    "module-lock.json",
+    "environments/dev/main.tf",
+    "environments/dev/outputs.tf",
+    "exercise/capstone-cycle.md"
+  ],
+  "topics": [
+    "D2.2",
+    "D2.3",
+    "D2.4",
+    "D2.7 live deployment, follow-up and cleanup"
+  ],
+  "duration": "45–60 minutes offline; live timing depends on instructor readiness",
+  "description": "No earlier laboratory required for offline study or tests. A complete module and verified local snapshot are included. Live steps require a private instructor-approved copy, protected main, sandbox and independent reviewers.",
+  "nextRepository": "alvinea28/ws2-operations-capstone-laboratory-08",
+  "completion": "Real plan, approved apply, no-change and scoped destroy jobs were observed; the preparation note alone could not complete this lab. A baseline run is not proof of a later capstone revision. Return here after Lab 8 for newly reviewed capstone deployment, follow-up and cleanup in the same single-writer repository. Every laboratory is independent; the catalogue order is a learning recommendation, not a requirement to create or finish another repository.",
+  "steps": [
+    {
+      "id": "1",
+      "title": "Map identity and state without enabling Azure",
+      "lesson": ".github/steps/01.md",
+      "requiresCommit": true,
+      "checks": [
+        {
+          "kind": "file",
+          "path": "exercise/identity-map.md",
+          "contains": [
+            "Reader",
+            "Contributor",
+            "Storage Blob Data Contributor",
+            "lease",
+            "AZURE_PLAN_CLIENT_ID",
+            "AZURE_APPLY_CLIENT_ID",
+            "STATE_CONTAINER",
+            "STATE_KEY"
+          ],
+          "notContains": [
+            "TODO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Observe an actual trusted dev plan",
+      "lesson": ".github/steps/02.md",
+      "requiresCommit": false,
+      "checks": [
+        {
+          "kind": "trusted-run",
+          "file": "delivery.yml",
+          "jobs": [
+            "Trusted dev plan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Review and independently approve exact-plan deployment",
+      "lesson": ".github/steps/03.md",
+      "requiresCommit": true,
+      "checks": [
+        {
+          "kind": "file",
+          "path": "exercise/plan-review.md",
+          "contains": [
+            "fresh plan",
+            "digest",
+            "2 hours",
+            "independent reviewer"
+          ],
+          "notContains": [
+            "TODO"
+          ]
+        },
+        {
+          "kind": "trusted-run",
+          "file": "delivery.yml",
+          "jobs": [
+            "Trusted dev plan",
+            "Apply reviewed dev plan"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Confirm a fresh no-change result",
+      "lesson": ".github/steps/04.md",
+      "requiresCommit": false,
+      "checks": [
+        {
+          "kind": "trusted-run",
+          "file": "delivery.yml",
+          "jobs": [
+            "Trusted dev plan",
+            "Confirm no-change"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "title": "Review scoped destruction and retain shared resources",
+      "lesson": ".github/steps/05.md",
+      "requiresCommit": false,
+      "checks": [
+        {
+          "kind": "trusted-run",
+          "file": "delivery.yml",
+          "jobs": [
+            "Trusted dev plan",
+            "Destroy reviewed dev plan"
+          ]
+        }
+      ]
+    }
+  ],
+  "beginnerSetup": true,
+  "sourceRepository": "alvinea28/ws2-azure-delivery-laboratory-07",
+  "sourceBranch": "dev",
+  "independent": true,
+  "prerequisiteLabs": []
+}

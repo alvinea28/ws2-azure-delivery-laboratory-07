@@ -1,0 +1,16 @@
+{
+  "name": "ws2-azure-delivery-laboratory-07",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "node --test .github/agentalvine/auto-guide.test.cjs scripts/doctor.test.mjs tests-node/*.test.mjs",
+    "offline:prepare": "node scripts/prepare-offline.mjs",
+    "kit:check": "node scripts/auto-kit.mjs",
+    "graph:check": "node scripts/graph-check.mjs",
+    "lab:check": "node scripts/check-learner.mjs",
+    "doctor": "node scripts/doctor.mjs"
+  }
+}

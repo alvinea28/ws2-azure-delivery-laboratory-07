@@ -1,0 +1,15 @@
+# Non-secret illustration, not an approved subscription or deployment.
+name                = "ws2-team01-dev"
+resource_group_name = "rg-ws2-team01-existing"
+location            = "southeastasia"
+address_space       = ["10.42.0.0/16"]
+subnets = {
+  web  = { address_prefixes = ["10.42.1.0/24"] }
+  data = { address_prefixes = ["10.42.2.0/24"] }
+}
+tags = {
+  owner       = "team01"
+  environment = "dev"
+  cost_center = "training"
+  workshop    = "ws2"
+}

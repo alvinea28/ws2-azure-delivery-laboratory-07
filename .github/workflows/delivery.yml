@@ -1,0 +1,285 @@
+name: Trusted dev delivery (instructor enablement required)
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Plan only, independently gated deployment/cleanup, drift, or explicit no-change confirmation
+        type: choice
+        options: [plan, deploy, destroy, drift, followup]
+        default: plan
+  schedule:
+    - cron: '17 2 * * 2'
+permissions: {}
+# GitHub concurrency is repository-scoped. The instructor designates ONE writer
+# repository per state. Blob leases are additional protection, not a replacement.
+concurrency:
+  group: ws2-state-${{ vars.WS2_STATE_LOCK_ID || github.repository }}
+  cancel-in-progress: false
+env:
+  WORKSHOP_AZURE_ENABLED: ${{ vars.WORKSHOP_AZURE_ENABLED }}
+  REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+  ARM_USE_OIDC: "true"
+  ARM_USE_AZUREAD: "true"
+  ARM_USE_CLI: "false"
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  PLAN_CLIENT_ID: ${{ vars.AZURE_PLAN_CLIENT_ID }}
+  APPLY_CLIENT_ID: ${{ vars.AZURE_APPLY_CLIENT_ID }}
+  STATE_STORAGE_ACCOUNT: ${{ vars.STATE_STORAGE_ACCOUNT }}
+  STATE_CONTAINER: ${{ vars.STATE_CONTAINER }}
+  STATE_KEY: ${{ vars.STATE_KEY }}
+  WORKLOAD_RG: ${{ vars.WORKLOAD_RG }}
+  WORKLOAD_INPUTS_JSON: ${{ vars.WORKLOAD_INPUTS_JSON }}
+jobs:
+  preflight:
+    name: Verify instructor gate configuration
+    if: vars.WORKSHOP_AZURE_ENABLED == 'true' && !github.event.repository.is_template && github.ref == 'refs/heads/main' && github.ref_protected
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      operation: ${{ steps.policy.outputs.operation }}
+      module_owner: ${{ steps.policy.outputs.module_owner }}
+      module_repo: ${{ steps.policy.outputs.module_repo }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Fail closed when real protections are unavailable
+        id: policy
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          REQUESTED_OPERATION: ${{ inputs.operation }}
+          STATE_LOCK_ID: ${{ vars.WS2_STATE_LOCK_ID }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const {pathToFileURL} = require('node:url');
+            const {resolve} = require('node:path');
+            const policy = await import(pathToFileURL(resolve('scripts/plan-policy.mjs')).href);
+            const snapshot = await import(pathToFileURL(resolve('scripts/module-snapshot.mjs')).href);
+            if (!context.payload.repository.private) throw new Error('Private saved-plan storage required');
+            if (process.env.GITHUB_RUN_ATTEMPT !== '1') throw new Error('Do not rerun credentialled jobs: dispatch a new run for a fresh plan and approval');
+            if (!/^[a-zA-Z0-9-]{3,80}$/.test(process.env.STATE_LOCK_ID || '')) throw new Error('Configure a single-writer state concurrency ID');
+            const branch = (await github.rest.repos.getBranch({...context.repo, branch:'main'})).data;
+            if (!branch.protected || branch.commit.sha !== context.sha) throw new Error('Only current protected main is allowed');
+            for (const name of ['dev-plan','dev-apply']) {
+              const environment = (await github.rest.repos.getEnvironment({...context.repo, environment_name:name})).data;
+              const branches = await github.paginate(github.rest.repos.listDeploymentBranchPolicies, {...context.repo, environment_name:name, per_page:100});
+              policy.assertEnvironmentProtection(environment, branches, name === 'dev-apply');
+            }
+            const lock = snapshot.validateLock(JSON.parse(fs.readFileSync('module-lock.json','utf8')), snapshot.moduleSource(fs.readFileSync('environments/dev/main.tf','utf8')));
+            const operation = policy.operationFor(context.eventName, process.env.REQUESTED_OPERATION);
+            core.setOutput('operation',operation);
+            core.setOutput('module_owner',lock.repository.split('/')[0]);
+            core.setOutput('module_repo',lock.repository.split('/')[1]);
+  plan:
+    name: Trusted dev plan
+    needs: preflight
+    runs-on: [self-hosted, linux, x64, ws2-trusted]
+    environment: dev-plan
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ARM_CLIENT_ID: ${{ vars.AZURE_PLAN_CLIENT_ID }}
+      OPERATION: ${{ needs.preflight.outputs.operation }}
+    outputs:
+      plan_sha256: ${{ steps.plan.outputs.plan_sha256 }}
+      manifest_sha256: ${{ steps.plan.outputs.manifest_sha256 }}
+      exitcode: ${{ steps.plan.outputs.exitcode }}
+      artifact: ${{ steps.plan.outputs.artifact }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.16.0
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+      - name: Short-lived read access to one private module
+        id: module
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.MODULE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MODULE_APP_PRIVATE_KEY }}
+          owner: ${{ needs.preflight.outputs.module_owner }}
+          repositories: ${{ needs.preflight.outputs.module_repo }}
+          permission-contents: read
+      - name: OIDC init, validate, plan and sanitized review summary
+        id: plan
+        env:
+          MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
+        run: node scripts/delivery.mjs plan
+      - name: Encrypt saved state and plan before artifact storage
+        env:
+          PLAN_ENCRYPTION_PUBLIC_KEY: ${{ vars.PLAN_ENCRYPTION_PUBLIC_KEY }}
+        run: node scripts/plan-envelope.mjs seal
+      - name: Save only the encrypted restricted plan envelope
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.plan.outputs.artifact }}
+          path: .workshop/sealed/plan.enc
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+      - name: Remove local sensitive files
+        if: always()
+        run: node scripts/delivery.mjs clean
+  apply:
+    name: Apply reviewed dev plan
+    needs: [preflight, plan]
+    if: needs.preflight.outputs.operation == 'deploy' && needs.plan.result == 'success'
+    runs-on: [self-hosted, linux, x64, ws2-trusted]
+    environment: dev-apply
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      ARM_CLIENT_ID: ${{ vars.AZURE_APPLY_CLIENT_ID }}
+      OPERATION: deploy
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.16.0
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.plan.outputs.artifact }}
+          path: .workshop/sealed
+      - name: Confirm current main and independently approved run
+        id: approval
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require('./scripts/approval.cjs')({github,context,core});
+      - name: Decrypt only after independent environment approval
+        env:
+          PLAN_DECRYPTION_PRIVATE_KEY: ${{ secrets.PLAN_DECRYPTION_PRIVATE_KEY }}
+        run: node scripts/plan-envelope.mjs open
+      - id: module
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.MODULE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MODULE_APP_PRIVATE_KEY }}
+          owner: ${{ needs.preflight.outputs.module_owner }}
+          repositories: ${{ needs.preflight.outputs.module_repo }}
+          permission-contents: read
+      - name: Verify exact plan and apply (no implicit replanning)
+        env:
+          MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
+          EXPECTED_PLAN_HASH: ${{ needs.plan.outputs.plan_sha256 }}
+          EXPECTED_MANIFEST_HASH: ${{ needs.plan.outputs.manifest_sha256 }}
+          CURRENT_MAIN_SHA: ${{ steps.approval.outputs.main_sha }}
+          GH_READ_TOKEN: ${{ github.token }}
+        run: node scripts/delivery.mjs apply
+      - if: always()
+        run: node scripts/delivery.mjs clean
+  destroy:
+    name: Destroy reviewed dev plan
+    needs: [preflight, plan]
+    if: needs.preflight.outputs.operation == 'destroy' && needs.plan.result == 'success'
+    runs-on: [self-hosted, linux, x64, ws2-trusted]
+    environment: dev-apply
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    env:
+      ARM_CLIENT_ID: ${{ vars.AZURE_APPLY_CLIENT_ID }}
+      OPERATION: destroy
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.16.0
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ needs.plan.outputs.artifact }}
+          path: .workshop/sealed
+      - id: approval
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require('./scripts/approval.cjs')({github,context,core});
+      - name: Decrypt only after independent cleanup approval
+        env:
+          PLAN_DECRYPTION_PRIVATE_KEY: ${{ secrets.PLAN_DECRYPTION_PRIVATE_KEY }}
+        run: node scripts/plan-envelope.mjs open
+      - id: module
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.MODULE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MODULE_APP_PRIVATE_KEY }}
+          owner: ${{ needs.preflight.outputs.module_owner }}
+          repositories: ${{ needs.preflight.outputs.module_repo }}
+          permission-contents: read
+      - name: Verify and apply the reviewed destroy plan only
+        env:
+          MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
+          EXPECTED_PLAN_HASH: ${{ needs.plan.outputs.plan_sha256 }}
+          EXPECTED_MANIFEST_HASH: ${{ needs.plan.outputs.manifest_sha256 }}
+          CURRENT_MAIN_SHA: ${{ steps.approval.outputs.main_sha }}
+          GH_READ_TOKEN: ${{ github.token }}
+        run: node scripts/delivery.mjs destroy
+      - if: always()
+        run: node scripts/delivery.mjs clean
+  followup:
+    name: Confirm no-change
+    needs: [preflight, plan]
+    if: needs.preflight.outputs.operation == 'followup' && needs.plan.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    env:
+      PLAN_EXIT: ${{ needs.plan.outputs.exitcode }}
+    steps:
+      - name: Changes must be explained, never reported as no-change
+        run: |
+          test "$PLAN_EXIT" = 0
+          echo 'The separately requested trusted follow-up plan reported no changes.' >> "$GITHUB_STEP_SUMMARY"
+  drift:
+    name: Report drift without applying
+    needs: [preflight, plan]
+    if: needs.preflight.outputs.operation == 'drift' && needs.plan.outputs.exitcode == '2'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const marker = '<!-- ws2-drift -->';
+            const issues = await github.paginate(github.rest.issues.listForRepo,{...context.repo,state:'open',per_page:100});
+            const existing = issues.find(i => i.user.login === 'github-actions[bot]' && i.body?.includes(marker));
+            const body = `${marker}\n## AgentAlvine · investigate drift\n\nTrusted plan detected changes: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}.\n\nReview the sanitized summary and restricted plan. Explain drift through an issue/PR; do not auto-fix it, broaden roles or disable locks.`;
+            if (existing) await github.rest.issues.createComment({...context.repo,issue_number:existing.number,body});
+            else await github.rest.issues.create({...context.repo,title:'AgentAlvine · dev drift requires review',body});
