@@ -117,6 +117,11 @@
       "id": ".github/workflows/delivery.yml",
       "kind": "module",
       "summary": "Numbered laboratory content and guarded automatic validation."
+    },
+    {
+      "id": "docs/daily work report/2026-09-08.md",
+      "kind": "report",
+      "summary": "Separate daily source/simulation verification, document URLs and genuine remaining prerequisites."
     }
   ],
   "edges": [
@@ -139,6 +144,11 @@
       "from": ".github/workflows/agentalvine.yml",
       "to": ".github/agentalvine/auto-guide.cjs",
       "rel": "invokes-trusted"
+    },
+    {
+      "from": "README.md",
+      "to": "docs/daily work report/2026-09-08.md",
+      "rel": "maintenance-report"
     }
   ],
   "hotspots": [
