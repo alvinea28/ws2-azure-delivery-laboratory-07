@@ -1,6 +1,6 @@
 # Laboratory 07 · Azure delivery controls and identity
 
-**Repository:** [alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) · **Recommended order:** 07 of 08 · **Time:** 45–60 minutes offline; live timing depends on instructor readiness
+**Public source template (not the clone URL after copying):** [alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) · **Recommended order:** 07 of 08 · **Time:** 45–60 minutes offline; live timing depends on instructor readiness
 
 > [!NOTE]
 > **This laboratory is independent.** No earlier laboratory required for offline study or tests. A complete module and verified local snapshot are included. Live steps require a private instructor-approved copy, protected main, sandbox and independent reviewers.
