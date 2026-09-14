@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-08T00:00:00Z",
+  "generatedAt": "2026-09-14T00:00:00Z",
   "root": ".",
   "nodes": [
     {
@@ -122,6 +122,52 @@
       "id": "docs/daily work report/2026-09-08.md",
       "kind": "report",
       "summary": "Separate daily source/simulation verification, document URLs and genuine remaining prerequisites."
+    },
+    {
+      "id": "full-ws-content/README.md",
+      "kind": "guide",
+      "summary": "Full workshop review index, own-copy Exercise UX and read-only source preview."
+    },
+    {
+      "id": "full-ws-content/00-start-here.md",
+      "kind": "guide",
+      "summary": "Complete canonical setup review copy; setup never authorizes Azure."
+    },
+    {
+      "id": "full-ws-content/activity-01.md",
+      "kind": "guide",
+      "summary": "Complete identity/state lesson; original A/B offline checkpoint verified."
+    },
+    {
+      "id": "full-ws-content/activity-02.md",
+      "kind": "guide",
+      "summary": "Complete trusted-plan lesson; original A/B instructor/cloud prerequisites pending."
+    },
+    {
+      "id": "full-ws-content/activity-03.md",
+      "kind": "guide",
+      "summary": "Complete exact-plan review/apply lesson; no original A/B live approval or apply."
+    },
+    {
+      "id": "full-ws-content/activity-04.md",
+      "kind": "guide",
+      "summary": "Complete fresh no-change lesson; original A/B live follow-up pending."
+    },
+    {
+      "id": "full-ws-content/activity-05.md",
+      "kind": "guide",
+      "summary": "Complete scoped-cleanup lesson; original A/B cleanup and retained inventory pending."
+    },
+    {
+      "id": "full-ws-content/simulation.md",
+      "kind": "report",
+      "summary": "Original 2026-09-08 A/B offline outcomes and counts; separate 2026-09-14 captures are not cloud proof."
+    },
+    {
+      "id": "docs/daily work report/2026-09-14.md",
+      "kind": "report",
+      "date": "2026-09-14",
+      "summary": "Daily full-content review, verified offline checks and preserved A/B live boundaries with dev publication and remote readback pending."
     }
   ],
   "edges": [
@@ -149,6 +195,52 @@
       "from": "README.md",
       "to": "docs/daily work report/2026-09-08.md",
       "rel": "maintenance-report"
+    },
+    {
+      "from": "README.md",
+      "to": "full-ws-content/README.md",
+      "rel": "review"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/00-start-here.md",
+      "rel": "setup"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/activity-01.md",
+      "rel": "activity"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/activity-02.md",
+      "rel": "activity"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/activity-03.md",
+      "rel": "activity"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/activity-04.md",
+      "rel": "activity"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/activity-05.md",
+      "rel": "activity"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/simulation.md",
+      "rel": "evidence"
+    },
+    {
+      "from": "README.md",
+      "to": "docs/daily work report/2026-09-14.md",
+      "rel": "maintenance-report",
+      "date": "2026-09-14"
     }
   ],
   "hotspots": [

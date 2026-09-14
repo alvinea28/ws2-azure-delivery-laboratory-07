@@ -1,0 +1,22 @@
+{
+  "capturedOn": "2026-09-14",
+  "exercisePreview": {
+    "kind": "Actual anonymous GitHub Exercise Preview viewport; zero participant progress",
+    "private": false,
+    "url": "https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1",
+    "previewRun": "https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/actions/runs/34879112972",
+    "capturedAt": "2026-09-14T19:07:27.020Z",
+    "sha256": "8383036dbc27e1ae2ba3405b95eb175419c249083b1fa82d5eddb10003463854"
+  },
+  "localValidation": {
+    "kind": "New local output-viewer capture of actual fresh commands; not terminal UI or a participant cycle",
+    "private": false,
+    "codeBaseRevision": "e61ab9f5e71f58592d730e636477f9734ff2dda8",
+    "controlledFilesSha256": "44053abf7b3000c68e5daba2508deb53e306605d5bd8c35916eb4ad4215b3260",
+    "nodePasses": 80,
+    "solvedLabPassed": true,
+    "capturedAt": "2026-09-14T19:07:27.488Z",
+    "sha256": "ea9df2de111e4c7dd717f495c70b2ff4ecb733cb940afbbcc78092d30ff34fba"
+  },
+  "historicalSimulation": "Original private A/B records remain in the private evidence repository; no original-day per-step screenshots exist."
+}
