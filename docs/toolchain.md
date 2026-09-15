@@ -1,10 +1,12 @@
 # Toolchain: install deliberately, verify the exact versions
 
-This page describes participant setup; it does not require an Azure account or another lab repository. Use official downloads and your organization's approved installation process. If a managed computer requires administrator approval, ask IT or the instructor rather than bypassing that restriction. GitHub CLI, Azure CLI, Azure PowerShell, containers, and a global package installation are not prerequisites here. See [copilot-guide.md](copilot-guide.md) for Copilot account setup; use instructor-approved editor extensions, not unverified alternatives.
+This page covers tools for this independent lab; no earlier lab repository is required. Local doctor and quality checks remain unchanged and do not require an Azure account. **Azure CLI is required for Azure login, existing-resource-group setup and instructor-approved live work**: follow [Azure setup](azure-setup.md) with your own tenant, subscription and existing RG.
+
+Use official downloads and your organization's approved installation process. If a managed computer requires administrator approval, ask IT or the instructor rather than bypassing that restriction. Azure PowerShell, containers and a global package installation are not local-check prerequisites. GitHub CLI is needed only for a documented CLI alternative, such as Lab 07 cleanup dispatch; the browser route remains available. See [copilot-guide.md](copilot-guide.md) for Copilot account setup; use instructor-approved editor extensions, not unverified alternatives.
 
 ## Quick navigation
 
-[Required tools](#know-which-tools-are-needed) · [OS and architecture](#choose-the-correct-operating-system-and-architecture) · [VS Code and Git](#prepare-desktop-vs-code-and-git) · [Node.js](#install-nodejs-24160) · [Terraform](#install-terraform-1161) · [terraform-docs](#add-terraform-docs-only-for-lab-4) · [Verify versions](#restart-and-verify-each-tool) · [Offline checks](#run-only-the-approved-offline-checks) · [Lab 4 generation](#generate-the-lab-4-documentation)
+[Required tools](#know-which-tools-are-needed) · [Azure CLI and account/RG setup](azure-setup.md) · [OS and architecture](#choose-the-correct-operating-system-and-architecture) · [VS Code and Git](#prepare-desktop-vs-code-and-git) · [Node.js](#install-nodejs-24160) · [Terraform](#install-terraform-1161) · [terraform-docs](#add-terraform-docs-only-for-lab-4) · [Verify versions](#restart-and-verify-each-tool) · [Offline checks](#run-only-the-approved-offline-checks) · [Lab 4 generation](#generate-the-lab-4-documentation)
 
 ## Know which tools are needed
 
@@ -16,9 +18,10 @@ This page describes participant setup; it does not require an Azure account or a
 | Terraform CLI | **1.16.1** | Terraform validation and provider-mocked tests; Lab 1's collaboration task does not execute Terraform |
 | AzureRM provider | **5.4.0** | Loaded by Terraform from the supplied provider lock, not installed as a separate CLI |
 | terraform-docs | **0.24.0 — Lab 4 only** | Generates the canonical module API documentation |
+| Azure CLI | Current instructor/organization-approved release; no workshop patch pin | Required for [your Azure login and existing-RG reads](azure-setup.md) and separately approved live work; not used by offline quality checks |
 
 > [!WARNING]
-> Do not sign in to Azure, initialize a real remote backend, run a real plan/apply/destroy operation, or read state to test an installation. Do not paste credentials into a terminal or chat. Never replace your whole PATH, change system-wide execution policies, disable certificate checks, or reset global settings to make a tool appear to work.
+> Follow [Azure setup](azure-setup.md) for read-only account/RG setup and trusted sign-in; neither grants provisioning authorization. Do not initialize a real remote backend, run a real plan/apply/destroy operation, or read state to test an installation. PR validation must receive no Azure login, OIDC, credentials or copied CLI cache. Do not paste passwords, tokens, device/MFA codes or other secrets into a terminal or chat. Never replace your whole PATH, change system-wide execution policies, disable certificate checks, or reset global settings to make a tool appear to work.
 
 ## Choose the correct operating system and architecture
 

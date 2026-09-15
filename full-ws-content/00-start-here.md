@@ -13,7 +13,7 @@ This guide takes you from a GitHub account to the **current task in your own pri
 Choose a laboratory in the [workshop catalogue](https://github.com/alvinea28/ws2-workshop-catalogue). Its number suggests a learning order, not a dependency. Keep this guide open in one browser tab and your own repository in another.
 
 > [!WARNING]
-> Setup is not permission to use Azure. Do not sign in to Azure, initialize a real remote backend, run a real infrastructure plan or apply, or access state. Never paste passwords, tokens, private keys, recovery codes, or Terraform state into chat, a terminal, an issue, or logs. Complete credential and device-code flows only through trusted browser and VS Code sign-in UI that you initiated.
+> Azure account and existing-resource-group setup is **read-only**: follow [Azure setup](../docs/azure-setup.md) using your own assigned tenant, subscription and group. Signing in and successful reads are **not provisioning authorization**. Do not initialize a real remote backend, access state, or run a real infrastructure plan/apply/destroy from setup or a PR job; keep PR validation credential-free. Never paste passwords, tokens, private keys, recovery codes, device/MFA codes, or Terraform state into chat, a terminal, an issue, or logs. Complete sign-in only through the trusted browser or VS Code UI that you initiated.
 
 ## Quick navigation
 
@@ -27,6 +27,7 @@ Choose a laboratory in the [workshop catalogue](https://github.com/alvinea28/ws2
 - [Set authorship only for this repository](#set-authorship-only-for-this-repository)
 - [Connect the correct Copilot account](#connect-the-correct-copilot-account)
 - [Check installed tools](#check-installed-tools)
+- [Set up your own Azure account and existing resource group](#set-up-your-own-azure-account-and-existing-resource-group)
 - [Run the read-only doctor](#run-the-read-only-doctor)
 - [Open the current Exercise](#open-the-current-exercise)
 
@@ -40,6 +41,7 @@ Choose a laboratory in the [workshop catalogue](https://github.com/alvinea28/ws2
 | Copilot seat or entitlement | Permission for your personal account to use Copilot | Write access to a repository or permission to deploy |
 | Git `user.name` and `user.email` | Authorship recorded in new commits | Sign-in, a Copilot seat, or repository permissions |
 | Repository **Owner** | The personal account or organization containing the copy | The identity of the person currently signed in |
+| Azure tenant, subscription and existing resource group | Your own work/school Azure login, assigned directory/subscription and RG-scoped access; see [Azure setup](../docs/azure-setup.md) | GitHub/Copilot access, workload-runner identity, backend access or permission to provision |
 
 An organization is a container for repositories, not a personal login. If the instructor assigns an organization as **Owner**, you still sign in with your own invited GitHub account. Membership, a Copilot seat, and repository write permission are separate grants.
 
@@ -221,7 +223,18 @@ See [copilot-guide.md](../docs/copilot-guide.md#sign-in-and-select-the-copilot-a
 
 Follow [toolchain.md](../docs/toolchain.md) for official downloads, architecture choices, safe PATH setup, and individual version checks. Every lab uses **Git, desktop VS Code and Node.js 24.16.0**. **Lab 01 does not need Terraform.** Labs **02–08** use **Terraform 1.16.1** and the supplied **AzureRM 5.4.0** provider lock. **terraform-docs 0.24.0 is needed only for Lab 04**.
 
-After a tool or PATH change, save your work and fully close and reopen VS Code before creating a new terminal. Merely opening another terminal in an old VS Code process may retain the old PATH. Do not change system-wide environment settings, reset all editor settings, or install an Azure login tool to satisfy these offline prerequisites.
+After a tool or PATH change, save your work and fully close and reopen VS Code before creating a new terminal. Merely opening another terminal in an old VS Code process may retain the old PATH. Do not change system-wide environment settings or reset all editor settings to satisfy these prerequisites. **Azure CLI is required for Azure login, existing-RG setup and instructor-approved live work**; install/check it through [Azure setup](../docs/azure-setup.md#2-install-azure-cli-only-if-it-is-missing). Local doctor and quality checks are unchanged and do not require Azure credentials.
+
+## Set up your own Azure account and existing resource group
+
+This is account/RG preparation, not an offline-test prerequisite or deployment step. Read-only setup remains separate from the doctor and local quality checks.
+
+1. Open [Azure setup](../docs/azure-setup.md) and find **your own instructor-assigned** tenant ID, subscription ID and existing resource group name in the [Azure portal](https://portal.azure.com/). Do not copy an author's or another attendee's values.
+2. Install or verify Azure CLI as shown in that guide, then use its PowerShell prompts to set only this terminal's `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` and `WORKLOAD_RG`. Enter the tenant GUID, subscription GUID and **existing group name**, not a full resource ID.
+3. Follow [the conditional sign-in](../docs/azure-setup.md#4-reuse-an-existing-login-or-sign-in-when-required): reuse a matching cached account, or finish the normal Microsoft browser login only when required. GitHub/Copilot login is separate. Never send passwords, device/MFA codes, tokens or CLI caches to chat or GitHub.
+4. Run [the current resource-group read](../docs/azure-setup.md#5-verify-the-actual-resource-group-without-provisioning-anything) in the same terminal. Expected safe output: `TenantAndSubscriptionMatched=True`, `ExistingResourceGroupReadable=True`, the group metadata region, and `ProvisioningPerformed=False`—not raw account JSON or IDs.
+5. Stop and ask the instructor if values/access do not match; do not create an RG, widen roles, initialize a real backend, access state or run real plan/apply/destroy from setup or PR validation. Local environment values do not configure the approved Actions runner.
+6. Continue with [the read-only doctor](#run-the-read-only-doctor), then return to **your existing private copy's Exercise issue**. Setup does not complete a task, authorize provisioning or convert mocked/historical results into new live evidence.
 
 ## Run the read-only doctor
 

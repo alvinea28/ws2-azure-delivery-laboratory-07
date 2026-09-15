@@ -1,6 +1,9 @@
 # Lab 07 · Full workshop content for review
 
-[Repository landing](../README.md) · [Complete setup](00-start-here.md) · [Simulation and verification](simulation.md)
+[Repository landing](../README.md) · [Complete setup](00-start-here.md) · [Azure inputs and login](azure-setup.md) · [Simulation and verification](simulation.md)
+
+> [!IMPORTANT]
+> **Azure setup:** [enter your own tenant, subscription and existing RG](azure-setup.md#1-find-the-three-values-before-opening-the-terminal) · [Azure CLI login and current RG check](azure-setup.md#4-reuse-an-existing-login-or-sign-in-when-required). This complete guide covers read-only account/RG preparation, not provisioning authorization or new live evidence. Local quality checks and PR jobs remain credential-free.
 
 This pack exposes the complete setup and all five activities in [the course manifest](../.github/agentalvine/course.json). It is a **static review copy**, not another exercise, bug-ticket list, or learner progress tracker. Lesson text is bounded by preservation markers; only Markdown relative links outside code fences are rebased. Commands, examples, and publisher attribution remain the lesson's own content.
 

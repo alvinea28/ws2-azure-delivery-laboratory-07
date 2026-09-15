@@ -6,6 +6,9 @@
 > **This laboratory is independent.** No earlier laboratory required for offline study or tests. A complete module and verified local snapshot are included. Live steps require a private instructor-approved copy, protected main, sandbox and independent reviewers.
 > New to the tools? The complete [illustrated first-time setup](docs/start-here.md) is included here—no other lab is required.
 
+> [!IMPORTANT]
+> **Azure setup:** [enter your own tenant, subscription and existing RG](docs/azure-setup.md#1-find-the-three-values-before-opening-the-terminal) · [Azure CLI login and current RG check](docs/azure-setup.md#4-reuse-an-existing-login-or-sign-in-when-required). Account/RG reads are setup, not provisioning authorization. Local quality checks and PR jobs remain credential-free.
+
 ## Start here — copy, clone, open and sign in
 
 **Before cloning:** if Git or desktop VS Code is not installed, complete [the official installation steps](docs/toolchain.md), restart VS Code, then continue below. If you have no GitHub account yet, choose **Sign up** on GitHub and verify your email as shown in [Start here](docs/start-here.md).
