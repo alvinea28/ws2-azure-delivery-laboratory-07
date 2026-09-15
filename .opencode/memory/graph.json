@@ -6,17 +6,17 @@
     {
       "id": "README.md",
       "kind": "guide",
-      "summary": "Numbered laboratory content and guarded automatic validation."
+      "summary": "Concise independent offline entry keeps live Lab 07 non-solo with protected main, separate identities and independent exact-plan/deploy/destroy approval."
     },
     {
       "id": ".github/agentalvine/course.json",
       "kind": "manifest",
-      "summary": "Numbered laboratory content and guarded automatic validation."
+      "summary": "Offline identity study and genuine live-job gates remain distinct from educational solo PRs and never replace independent Azure authorization."
     },
     {
       "id": ".github/agentalvine/auto-guide.cjs",
       "kind": "module",
-      "summary": "Numbered laboratory content and guarded automatic validation."
+      "summary": "Trusted AgentAlvine runtime changes only review-mode-specific PR feedback and leaves live-job evaluation and protected independent approvals unchanged."
     },
     {
       "id": ".github/agentalvine/auto-guide.test.cjs",
@@ -51,12 +51,12 @@
     {
       "id": "docs/start-here.md",
       "kind": "guide",
-      "summary": "Standalone illustrated first-time-user guidance or image provenance."
+      "summary": "Concise independent install/account/copy/clone/open entry retains offline access and explicitly requires human preflight for protected live work."
     },
     {
       "id": "docs/git-workflow.md",
       "kind": "guide",
-      "summary": "Standalone illustrated first-time-user guidance or image provenance."
+      "summary": "Concise Git workflow distinguishes 01/05 educational self-merge from non-solo live 07 protected-main and independent approval requirements."
     },
     {
       "id": "docs/copilot-guide.md",
@@ -106,7 +106,7 @@
     {
       "id": "docs/dependency-snapshot.md",
       "kind": "guide",
-      "summary": "Standalone illustrated first-time-user guidance or image provenance."
+      "summary": "Shortened advanced guide preserves verified offline snapshot and exact dependency provenance boundaries without changing the baseline module or lock."
     },
     {
       "id": ".github/actionlint.yaml",
@@ -116,7 +116,7 @@
     {
       "id": ".github/workflows/delivery.yml",
       "kind": "module",
-      "summary": "Numbered laboratory content and guarded automatic validation."
+      "summary": "Unchanged protected single-writer delivery retains independent encrypted exact-plan review and real deploy/follow-up/destroy gates without wiring new companions."
     },
     {
       "id": "docs/daily work report/2026-09-08.md",
@@ -126,7 +126,7 @@
     {
       "id": "full-ws-content/README.md",
       "kind": "guide",
-      "summary": "Full workshop review index, own-copy Exercise UX and read-only source preview."
+      "summary": "Concise five-lesson review index and posture companion preserve non-grading Preview, original A/B pending live gates and independent protected approvals."
     },
     {
       "id": "full-ws-content/00-start-here.md",
@@ -185,7 +185,85 @@
       "id": "docs/daily work report/2026-09-15.md",
       "kind": "report",
       "date": "2026-09-15",
-      "summary": "Attendee-owned setup and complete guarded destroy CLI documentation retain same-state exact-plan approval, empty-state and human-inventory gates without claiming execution."
+      "summary": "Same-day setup/cleanup history plus concise posture follow-up records 80 Node passes; commit-bound publication tracked separately without new live execution or removed independent approvals."
+    },
+    {
+      "id": "docs/glossary.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise delivery terminology separates OIDC, state, saved plans, independent authorization and educational issue progress."
+    },
+    {
+      "id": ".github/steps/01.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise offline identity/state lesson permits independent study without pretending live prerequisites are satisfied."
+    },
+    {
+      "id": ".github/steps/02.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise trusted-plan lesson requires the approved private protected writer and actual current live evidence."
+    },
+    {
+      "id": ".github/steps/03.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise exact-plan review/apply lesson retains independent reviewers and encrypted saved-plan binding."
+    },
+    {
+      "id": ".github/steps/04.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise follow-up lesson requires a fresh actual no-change live result, not reused CI or simulated progress."
+    },
+    {
+      "id": ".github/steps/05.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Concise full-cleanup lesson retains same-state independent exact destroy-plan review/apply plus empty managed state and human inventory confirmation."
+    },
+    {
+      "id": "docs/delivery-configuration.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Shortened advanced delivery configuration guide keeps protected environments, identities and one approved workload writer explicit."
+    },
+    {
+      "id": "docs/identity-state.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Shortened advanced identity/state guide separates local sign-in, plan/apply identities and restricted state from credential-free PR validation."
+    },
+    {
+      "id": "docs/instructor-preflight.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Shortened instructor checklist retains actual sandbox, permissions, backend, runner, protected branch and independent-review readiness gates."
+    },
+    {
+      "id": "docs/plan-review.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Shortened exact-plan review guide retains encrypted artifact handling, current revision binding and independent approval before apply or destroy."
+    },
+    {
+      "id": "docs/recovery.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Shortened recovery guide preserves the original writer/state and fail-closed live recovery/cleanup rather than bypassing protected controls."
+    },
+    {
+      "id": "docs/defender-posture-hands-on.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Posture guide requires an eligible approved live workload, actual recommendation evidence, Git remediation and complete cleanup without claiming a new live run."
+    },
+    {
+      "id": "full-ws-content/defender-posture-hands-on.md",
+      "kind": "guide",
+      "date": "2026-09-15",
+      "summary": "Full Defender posture review mirror retains independent live approval and distinguishes source scanning from deployed recommendation verification."
     }
   ],
   "edges": [
@@ -295,6 +373,121 @@
       "to": "docs/daily work report/2026-09-15.md",
       "rel": "maintenance-report",
       "date": "2026-09-15"
+    },
+    {
+      "from": "docs/start-here.md",
+      "to": "docs/glossary.md",
+      "rel": "terminology"
+    },
+    {
+      "from": ".github/agentalvine/course.json",
+      "to": ".github/steps/01.md",
+      "rel": "lesson"
+    },
+    {
+      "from": ".github/agentalvine/course.json",
+      "to": ".github/steps/02.md",
+      "rel": "lesson"
+    },
+    {
+      "from": ".github/agentalvine/course.json",
+      "to": ".github/steps/03.md",
+      "rel": "lesson"
+    },
+    {
+      "from": ".github/agentalvine/course.json",
+      "to": ".github/steps/04.md",
+      "rel": "lesson"
+    },
+    {
+      "from": ".github/agentalvine/course.json",
+      "to": ".github/steps/05.md",
+      "rel": "lesson"
+    },
+    {
+      "from": "full-ws-content/activity-01.md",
+      "to": ".github/steps/01.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "full-ws-content/activity-02.md",
+      "to": ".github/steps/02.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "full-ws-content/activity-03.md",
+      "to": ".github/steps/03.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "full-ws-content/activity-04.md",
+      "to": ".github/steps/04.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "full-ws-content/activity-05.md",
+      "to": ".github/steps/05.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "README.md",
+      "to": "docs/defender-posture-hands-on.md",
+      "rel": "companion-guide"
+    },
+    {
+      "from": "full-ws-content/README.md",
+      "to": "full-ws-content/defender-posture-hands-on.md",
+      "rel": "companion-guide"
+    },
+    {
+      "from": "full-ws-content/defender-posture-hands-on.md",
+      "to": "docs/defender-posture-hands-on.md",
+      "rel": "mirrors"
+    },
+    {
+      "from": "docs/defender-posture-hands-on.md",
+      "to": "docs/instructor-preflight.md",
+      "rel": "requires-live-preflight"
+    },
+    {
+      "from": "docs/instructor-preflight.md",
+      "to": "docs/delivery-configuration.md",
+      "rel": "delivery-boundary"
+    },
+    {
+      "from": "docs/delivery-configuration.md",
+      "to": ".github/workflows/delivery.yml",
+      "rel": "documents-protected-writer"
+    },
+    {
+      "from": ".github/steps/01.md",
+      "to": "docs/identity-state.md",
+      "rel": "explains"
+    },
+    {
+      "from": ".github/steps/02.md",
+      "to": "docs/dependency-snapshot.md",
+      "rel": "dependency-boundary"
+    },
+    {
+      "from": ".github/steps/03.md",
+      "to": "docs/plan-review.md",
+      "rel": "requires-independent-review"
+    },
+    {
+      "from": ".github/steps/05.md",
+      "to": "docs/recovery.md",
+      "rel": "recovery-boundary"
+    },
+    {
+      "from": "docs/daily work report/2026-09-15.md",
+      "to": "docs/defender-posture-hands-on.md",
+      "rel": "records-companion-scope"
+    },
+    {
+      "from": "docs/daily work report/2026-09-15.md",
+      "to": ".github/workflows/delivery.yml",
+      "rel": "records-unchanged-protection"
     }
   ],
   "hotspots": [

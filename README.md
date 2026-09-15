@@ -2,28 +2,28 @@
 
 **Public source template (not the clone URL after copying):** [alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) · **Recommended order:** 07 of 08 · **Time:** 45–60 minutes offline; live timing depends on instructor readiness
 
-> [!NOTE]
-> **This laboratory is independent.** No earlier laboratory required for offline study or tests. A complete module and verified local snapshot are included. Live steps require a private instructor-approved copy, protected main, sandbox and independent reviewers.
-> New to the tools? The complete [illustrated first-time setup](docs/start-here.md) is included here—no other lab is required.
+**Goal:** Map identity/state offline, then understand the protected plan → review → apply → followup → destroy sequence. A complete module/snapshot is supplied; **no earlier lab or Azure account is needed for offline study**.
 
-> [!IMPORTANT]
-> **Azure setup:** [enter your own tenant, subscription and existing RG](docs/azure-setup.md#1-find-the-three-values-before-opening-the-terminal) · [Azure CLI login and current RG check](docs/azure-setup.md#4-reuse-an-existing-login-or-sign-in-when-required). Account/RG reads are setup, not provisioning authorization. Local quality checks and PR jobs remain credential-free.
+> [!WARNING]
+> **Public templates remain inert. Live Lab 07 is not solo:** one approved private writer, protected current `main` and independent reviewers remain mandatory. [All live safeguards](.github/steps/02.md) still apply. Missing readiness means **BLOCKED**, not self-approval. After actual provisioning, [full reviewed cleanup](.github/steps/05.md) is mandatory; retain shared RG/backend/identities/runner.
 
-## Start here — copy, clone, open and sign in
+## Start here — five actions
 
-**Before cloning:** if Git or desktop VS Code is not installed, complete [the official installation steps](docs/toolchain.md), restart VS Code, then continue below. If you have no GitHub account yet, choose **Sign up** on GitHub and verify your email as shown in [Start here](docs/start-here.md).
+1. **Install / account:** follow [toolchain](docs/toolchain.md) for Git, desktop VS Code, Node **24.16.0**, Terraform **1.16.1**; AzureRM **5.4.0** is pinned. GitHub newcomer: **Sign up**, verify email, sign in and accept any instructor invitation.
+2. **Copy once:** use **COPY EXERCISE** below; keep a unique name ending `-laboratory-07`. Already in your private copy? Do not copy again; keep its Exercise.
+3. **Clone:** copy **your copy's Code → HTTPS URL**. In VS Code: **Ctrl+Shift+P → Git: Clone**, paste it, authorize the correct account in the trusted browser and choose a parent folder. macOS uses **Cmd**.
+4. **Open / accounts:** **Open** the clone; trust only it. Explorer must show this repository, not its parent/ZIP. Check **Accounts → GitHub Copilot**/seat; configure local Git authorship using [illustrated setup](docs/start-here.md). Authorship, Git credentials, browser login and Copilot entitlement differ.
+5. **Check:** open **Terminal → New Terminal** at this clone's root:
 
-1. **Browser:** sign in to your intended personal GitHub account. If the instructor assigned an organization, accept its invitation using that personal account.
-2. **GitHub:** create your own **Private** copy below, retaining **-laboratory-07** at the end of its name. If you already made a copy, do not copy again.
-3. **Desktop VS Code:** press **Ctrl+Shift+P** (macOS **Cmd+Shift+P**) → **Git: Clone** → paste **your own copy's HTTPS URL**, not this public source URL. Complete the trusted browser sign-in with the correct account.
-4. **Open the clone:** choose a local parent folder, then **Open** the newly cloned repository. Trust only the known workshop copy. Explorer must show this repository, not a parent with multiple labs or a browser-only virtual workspace.
-5. **Accounts:** verify GitHub and **GitHub Copilot** sign-in/seat. Git commit name/email is not sign-in. Use [account and context screenshots](docs/copilot-guide.md) if anything is unclear.
-6. **Terminal → New Terminal:** follow [tool installation and version checks](docs/toolchain.md), configure local Git authorship, then run **node scripts/doctor.mjs**. It checks local readiness, not browser/Copilot authorization.
-7. **Exercise:** refresh your copy after 20–60 seconds and open its Exercise issue. Follow the current detailed task and [save → stage → commit → push guide](docs/git-workflow.md).
+```powershell
+node scripts/doctor.mjs
+```
+
+**Why:** `node` runs the supplied [read-only doctor](scripts/doctor.mjs), checking local tools/context—not sign-in, a seat or Azure authorization. Resolve failures before the first edit.
 
 ![Microsoft reference: cloning from GitHub in VS Code](docs/images/vscode-clone-github.png)
 
-*REFERENCE — Microsoft documentation example, not your account/repository. [Image attribution](docs/images/NOTICE.md). Detailed clone steps are in [Start here](docs/start-here.md#clone-your-copy-into-desktop-vs-code).*
+*REFERENCE — Microsoft, CC BY 3.0 US; not your account/repository. [Attribution](docs/images/NOTICE.md).*
 
 <!-- AGENTALVINE:START -->
 ## Copy this exercise once
@@ -33,23 +33,14 @@
 Select the intended Owner, keep **Private**, leave **Include all branches** off, and create the copy. Its own AgentAlvine issue will appear automatically.
 <!-- AGENTALVINE:END -->
 
-## Full workshop review
+## Expected result / next
 
-[Complete setup, all activities and simulation evidence](full-ws-content/README.md) · [Public source Exercise #1 — read-only instructor Preview](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1).
+Refresh **your copy's Exercise link** and follow its current task, starting on `lab/identity`. AgentAlvine updates the **same issue body** from real work/checks. No manual checkboxes, run IDs or evidence PRs; PR validation remains credential-free.
 
-The source preview stays at zero learner progress. Learners use the **Exercise link in their own private copy's README**; AgentAlvine validates real work and updates that same issue body, not a separate ticket per activity. Neither the review pack nor issue progress authorizes Azure.
+[All five activities and historical outcomes](full-ws-content/README.md) · [Source Exercise #1: read-only Preview, zero learner progress](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1). Neither is a new learner's grade or live authorization.
 
-## What is included and what remains external
+**Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](docs/defender-posture-hands-on.md). Requires the existing approved private writer and actual deploy/followup; independent approvals and mandatory full cleanup remain unchanged. No execution or automatic grade is claimed.
 
-- This copy has its own instructions, exercises, reference code and tests. The catalogue sequence builds concepts; there is no required earlier repository.
-- Git, VS Code, Node24.16.0 and Terraform1.16.1 are required. AzureRM5.4.0 is pinned; tests use mocks, not an Azure account.
-- Tool/setup instructions and a read-only doctor are provided locally.
-- Public templates never deploy. Live steps require a private instructor-approved copy, protected main, prepared sandbox/state/identities/restricted runner and genuine independent encrypted-plan review. Without these, finish offline study and stop at the instructor handoff.
-
-## Help without guessing
-
-[First-time setup](docs/start-here.md) · [Git actions](docs/git-workflow.md) · [Copilot accounts/context](docs/copilot-guide.md) · [Toolchain](docs/toolchain.md) · [Settings/Actions troubleshooting](docs/troubleshooting.md) · [Glossary](docs/glossary.md)
-
-Do not edit progress checkboxes or send manual evidence commands. AgentAlvine updates the same issue from real activity; a green checklist is not Azure authorization.
+**Recovery:** [Setup](docs/start-here.md) · [Git actions](docs/git-workflow.md) · [Troubleshooting](docs/troubleshooting.md). Instructor-directed [Azure inputs/login](docs/azure-setup.md) are optional account preparation, not provisioning permission. AVM **4.81** is separate from the **5.4.0** baseline, not live-connected.
 
 [All eight numbered laboratories](https://github.com/alvinea28/ws2-workshop-catalogue) · [MIT code license](LICENSE) · [Screenshot licenses](docs/images/NOTICE.md)

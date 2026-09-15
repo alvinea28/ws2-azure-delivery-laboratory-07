@@ -1,169 +1,133 @@
 # Plan review: bind one decision to one encrypted plan
 
 > [!WARNING]
-> **INSTRUCTOR ONLY — reference, not participant authorization.** This page
-> describes a future authorized private-copy run. **All live operations remain
-> unexecuted and blocked during authoring.** Keep `WORKSHOP_AZURE_ENABLED=false`
-> until the instructor's approved readiness decision. Do not ask Copilot to run
-> delivery, read state, decrypt a plan, or approve an environment.
+> **INSTRUCTOR ONLY.** Templates inert; **PRIVATE writer**, `WORKSHOP_AZURE_ENABLED=false`
+> until [preflight](instructor-preflight.md). No authoring Azure/identity/state/subscription
+> operations/decryption. Copilot, PR approval and AgentAlvine never authorize Azure.
 
-**Start:** [start-here.md](start-here.md) · **Help:** [troubleshooting.md](troubleshooting.md)
-**Prerequisites:** [instructor-preflight.md](instructor-preflight.md) · **Recovery:** [recovery.md](recovery.md)
+**Setup once:** [start-here.md](start-here.md) · **Settings:** [delivery-configuration.md](delivery-configuration.md) · **Recovery:** [recovery.md](recovery.md)
 
 ## 1. Understand the five operations before opening Run workflow
 
-The public template
-[alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07)
-is inert. Only an instructor-approved **PRIVATE copy** can host live delivery.
-The shipped workflow is **Trusted dev delivery (instructor enablement required)**.
+Workflow: **Trusted dev delivery (instructor enablement required)**, baseline only.
+All operations: **Verify instructor gate configuration → Trusted dev plan**.
 
-| Event / operation | Exact job path after **Verify instructor gate configuration** | Meaning |
+| Do | Why | Expected |
 | --- | --- | --- |
-| Manual `plan` | **Trusted dev plan** | Produce a reviewable encrypted plan; never apply it in this run |
-| Manual `deploy`, or enabled push to `main` | **Trusted dev plan → Apply reviewed dev plan** | New deployment plan, independent `dev-apply` review, exact saved-plan apply |
-| Manual `followup` | **Trusted dev plan → Confirm no-change** | Separately requested fresh observation; only exit 0 passes confirmation |
-| Manual `destroy` | **Trusted dev plan → Destroy reviewed dev plan** | New destroy plan and separate independent cleanup approval |
-| Manual `drift`, or schedule | **Trusted dev plan → Report drift without applying**, when exit 2 | Report changes through a drift issue; never remediate automatically |
+| `plan` (default) | Observe only | Nondeployable artifact |
+| `deploy` / enabled main push | Reviewed mutation | **Apply reviewed dev plan** |
+| `followup` | Verify | **Confirm no-change**, separate exit 0 |
+| `destroy` | Full cleanup/new review | **Destroy reviewed dev plan** |
+| `drift` / schedule | Report only | Exit 2 → **Report drift without applying** |
 
-The schedule is Tuesday **02:17 UTC** and maps to `drift`; GitHub schedules use
-the default branch, so the approved private copy must have protected `main` as
-default. A push maps to `deploy`. Manual dispatch defaults to `plan`.
-Neither a dispatch click, a successful PR check, nor AgentAlvine progress is approval.
+Protected default `main`; schedule Tuesday **02:17 UTC**. No duplicate requests;
+dispatch is not independent approval.
+
+```mermaid
+flowchart LR
+    P[Fresh plan] --> R[Independent review]
+    R --> A[Exact saved-plan apply]
+    A --> F[Separate followup]
+    F --> D[Fresh destroy plan and new review]
+    D --> C[Full cleanup and inventory]
+```
+
+Flow: plan → review → exact apply → separate followup → newly reviewed destroy → inventory.
 
 ## 2. Find the exact run in GitHub
 
-![GitHub reference showing the Actions navigation tab](images/github-actions.webp)
+![GitHub reference: Actions tab](images/github-actions.webp)
 
-*REFERENCE — GitHub navigation example, CC BY 4.0; not a live run or Azure result.
-[images/NOTICE.md](images/NOTICE.md).*
+![GitHub reference: workflow sidebar](images/github-workflow-sidebar.webp)
 
-1. In the **private copy**, select **Actions** in the repository navigation.
-2. Select **Trusted dev delivery (instructor enablement required)** in the workflow sidebar.
-3. During the separately authorized live window only, the instructor selects **Run workflow**.
-4. Select **Branch: main**, check the exact operation, and confirm the requested action with the authorized humans before dispatch.
-5. Open the newly created run; compare its commit, event, operation, and attempt with the intended request.
-6. Open **Verify instructor gate configuration**, then **Trusted dev plan**; stop at any failed prerequisite.
-7. Return to the run **Summary** for the sanitized plan inventory and trusted plan/manifest digests.
+*Unmodified GitHub references, not live proof. [CC BY 4.0](images/NOTICE.md).*
 
-![GitHub reference showing the workflow-selection sidebar](images/github-workflow-sidebar.webp)
-
-*REFERENCE — the publisher selects CodeQL; choose the delivery workflow named
-above, not CodeQL or New workflow. CC BY 4.0; [images/NOTICE.md](images/NOTICE.md).
-This is a navigation example, not configured Azure infrastructure.*
+| Do | Why | Expected |
+| --- | --- | --- |
+| Actions → delivery (not CodeQL) → Run workflow | Authorized operation | **main**, correct event/SHA, attempt **1** |
+| Read preflight/plan → Summary | Verify | Success, inventory, both digests; otherwise stop |
 
 ## 3. Interpret Terraform's detailed plan result correctly
 
-| Detailed exit code | Interpretation | Required response |
-| --- | --- | --- |
-| **0** | Successful plan with no changes | Eligible for **Confirm no-change** only in a separate `followup` run |
-| **2** | Successful plan with changes | Review actual changes; not an execution error and not no-change |
-| **1** | Planning failed | Stop; no usable plan may proceed to apply/destroy |
-| Signal, missing, or unexpected result | Execution did not satisfy the contract | Stop and diagnose; never coerce it into 0 or 2 |
-
-Output-only changes can produce exit 2 even when no managed-resource rows change.
-For `followup`, exit 2 fails **Confirm no-change** and leaves acceptance open.
-For `drift`, exit 2 triggers **Report drift without applying**; exit 0 skips that
-report job. A planning error is neither an empty drift report nor successful cleanup.
+**0:** no-change (separate followup only; drift report skipped). **2:** changes,
+even output-only; followup fails, drift reports. **1**/signal/missing/unexpected:
+stop—no mutation or cleanup credit.
 
 ## 4. Review the encrypted artifact on an approved human workstation
 
-Saved plans include state snapshots. The workflow uploads only **plan.enc**, not
-the plaintext plan or manifest. Encryption is **AES-256-GCM** with a random data
-key wrapped by **RSA-OAEP/SHA-256**, using RSA **3072 bits or stronger**.
-Ciphertext may be readable by private-repository readers or a PR-controlled
-workflow; privacy alone is not the protection. PR workflows must never obtain
-the private key or download plaintext plans, raw JSON, or state.
+Plans contain state: upload **ciphertext only**, AES-256-GCM; random key wrapped
+RSA-OAEP/SHA-256, RSA **≥3072 bits**. Planning gets public key only; PRs/readers
+never receive plaintext/decryption keys. Retention **1 day** ≠ validity **2 hours**.
 
-1. The independent reviewer confirms authorization, a restricted workstation, filesystem ACLs, and the pinned toolchain; do not use an ordinary learner/PR workspace or Copilot chat.
-2. On this exact run's **Summary → Artifacts**, select the artifact whose name matches the run ID and attempt shown by **Trusted dev plan**.
-3. Download only that encrypted archive through the approved private channel; reject a differently sourced or renamed artifact.
-4. Extract its encrypted payload into the dedicated review checkout at the first path below. Do not commit any review material.
+Independent reviewer: restricted workstation/ACLs, trusted non-PR checkout.
+**This run/attempt → Summary → Artifacts**: approved-channel ciphertext download:
 
 ```text
-.workshop/sealed/plan.enc          downloaded ciphertext
-.workshop/private/reviewed.tfplan  plaintext created by the open helper
-.workshop/private/manifest.json   plaintext created by the open helper
+.workshop/sealed/plan.enc          input: downloaded ciphertext
+.workshop/private/reviewed.tfplan  output: plaintext binary plan
+.workshop/private/manifest.json    output: plaintext manifest
 ```
 
-5. The authorized reviewer sets `PLAN_KEY_PATH` to the securely escrowed private-key **file path**, never to key text. In PowerShell this is the `$env:PLAN_KEY_PATH` process variable; do not put PEM material in commands or chat.
-6. Using the trusted [../scripts/plan-envelope.mjs](../scripts/plan-envelope.mjs) helper, the human opens the envelope with `node scripts/plan-envelope.mjs open` in that restricted checkout.
-7. Compute SHA-256 of the decrypted **binary plan** and **manifest bytes** using the approved local hashing UI/tool, and compare both with this run's trusted summary. Do not compare an envelope/archive hash to a plan hash.
-8. Use the instructor-prepared Terraform **1.16.1** / AzureRM **5.4.0** local saved-plan inspection environment to examine properties and outputs; this is human review, not a new Azure plan or a state pull.
-9. Compare the identities, scope, module revision, inputs, timestamps, and actions below. If any proof is missing, reject rather than approve from a summary alone.
-10. Remove decrypted review files and downloads according to the approved workstation retention process. Keep only a sanitized private decision record; escrow custody follows instructor policy.
+**Why:** paths, not commands; private/uncommitted outputs.
 
-If inspection lacks provider schemas or tool support, stop and ask the instructor
-to prepare the approved local review environment. Do not initialize the real backend
-or retrieve state to make saved-plan inspection work.
+From that checkout root:
 
-`PLAN_DECRYPTION_PRIVATE_KEY` is an Actions secret in **dev-apply only**; the
-other authorized copy is human reviewer escrow. Planning receives only the public
-key. Neither the reviewer procedure nor the key-generation helper was executed
-during this documentation task. Artifact retention is **1 day**; plan validity
-is **2 hours**, checked after the approval wait and again before mutation.
+```powershell
+$env:PLAN_KEY_PATH = Read-Host 'Approved escrowed private-key FILE PATH, never key text'
+node scripts/plan-envelope.mjs open
+```
+
+**Why:** `Read-Host`: process key-file path only. `node` runs the [helper](../scripts/plan-envelope.mjs);
+`open` decrypts. `PLAN_DECRYPTION_PRIVATE_KEY`: unset locally, **dev-apply only**,
+separate human escrow. Stop on failure.
+
+Verify [bindings](#5-verify-the-binding-not-merely-a-matching-filename); inspect properties/outputs using prepared schemas. Missing tooling:
+stop—no backend init/new Azure plan/state retrieval. Remove plaintext/downloads/
+`PLAN_KEY_PATH` per workstation policy; retain sanitized private decision/escrow.
+No plaintext/keys in chat.
 
 ## 5. Verify the binding, not merely a matching filename
 
-| Bound value / independent control | Required comparison before apply or destroy |
-| --- | --- |
-| Repository, commit, run ID, attempt, operation | This private copy, exact reviewed `main` SHA, current run, attempt **1**, correct deploy/destroy intent |
-| Root and environment | Canonical dev root and environment, never another root, path, or workspace |
-| Tenant, subscription, RG, plan/apply clients | Approved sandbox tuple and two distinct principals |
-| Backend | Exact account **and** container **and** key; a matching key alone is insufficient |
-| Module-lock digest | Same repository/revision/subdirectory/source/file hashes; actual installed source verified against the snapshot |
-| Provider-lock and inputs digests | Same committed lock and approved serialized workload inputs used for planning |
-| Toolchain | Terraform **1.16.1**, AzureRM **5.4.0**; workflow provides the intended Linux x64 execution platform |
-| Plan and manifest SHA-256 | Actual bytes match the independent trusted plan-job outputs and each other |
-| Creation time | Valid, not future-dated, and no more than **2 hours** old at consumption |
-| Current protected `main` | Still the planned commit after approval and again after initialization, immediately before mutation |
-| Workflow and artifact source | Selected-workflow runner policy and same-run workflow dependency; not arbitrary caller-supplied artifacts |
-| State continuity | Terraform's own saved-plan stale-state checks and Blob locking remain active |
+| Do | Why | Expected |
+| --- | --- | --- |
+| Match request | Scope | Repository/SHA/run/attempt **1**/operation; [canonical root](../environments/dev/main.tf), `dev`, default workspace |
+| Match approved sandbox/state | Isolation | Tenant/subscription/RG, distinct OIDC plan/apply principals, exact account/container/key |
+| Match dependencies | Provenance | Module repository/revision/subdirectory/source/inventory/hashes, installed snapshot, provider-lock/serialized-input digests; Terraform **1.16.1**, AzureRM **5.4.0** |
+| SHA-256 binary/manifest bytes | Integrity | Both trusted plan-job digests, not archive hashes; manifest's plan hash agrees |
+| Recheck age/main after approval/init, immediately before mutation | Freshness | Nonfuture age ≤**2 hours**, unchanged protected main |
 
-The manifest serializes the configuration tuple plus toolchain/lock/input digests.
-Workflow-path and platform restrictions are enforced by trusted workflow/settings,
-not separate manifest fields. The expected digests come from this run's trusted
-plan job, not a learner-edited manifest. If `main`, inputs, source, locks, or state
-change, stop and create a fresh plan with fresh review; no implicit replanning.
+Settings, not manifest fields: same-run artifact, restricted Linux x64 **exact-workflow**
+runner, stale-state checks/Blob leases. Changed main/inputs/source/locks/state:
+**fresh plan/review**; never edited digests, substituted artifacts or implicit replan.
 
 ## 6. Approve only after property-level human review
 
-The scope is network workload only: VNet, named subnets, NSG, rules, and subnet
-associations. Read actual additions, updates, replacements, deletes, and outputs;
-do not copy expected counts from mocked tests. Review unexpected CIDRs, ingress,
-lost associations, replacements, and any shared-resource action as stop conditions.
+Review VNet/subnet/NSG/rules/associations and outputs, not mock counts. Reject
+unexpected CIDRs/ingress, lost associations, replacements/shared-resource actions.
+Destroy: workload **deletes/no-ops only**.
 
-1. The eligible nonauthor reviewer returns to the **same run → Review deployments**.
-2. Select the pending `dev-apply` deployment only after inspecting that run's plan.
-3. Confirm **Required reviewers**, **Prevent self-review**, no admin bypass, and the main-only branch rule remain effective.
-4. Confirm the approver is neither an associated merged-PR author nor the run actor/triggering actor; a bot or issue comment is not an approval.
-5. Approve or reject with a sanitized rationale. Missing independence means stop and arrange another eligible human.
+**Same run → Review deployments → dev-apply → Approve and deploy** (or reject).
+Required reviewers, **Prevent self-review**, no administrator bypass, main-only.
+Exclude run/triggering actor and merged-PR/code author; no bots/comments.
+The job verifies approval history/merged-main PR association.
 
-After the gate, the job **Confirm current main and independently approved run**
-checks actual approval history and the merged-main PR association. Apply/destroy
-then decrypts, verifies bindings, initializes with the proper identity, checks
-installed source, rechecks current `main`/age/digests, and applies the **same binary**.
-It must not generate a replacement plan. See [delivery-configuration.md](delivery-configuration.md)
-for settings and [identity-state.md](identity-state.md) for scope.
+After approval: decrypt/check/init with [correct identity](identity-state.md),
+reverify source/main/age/digests, apply **same saved binary**.
 
 ## 7. Verify results without declaring premature completion
 
-| Result | Required next observation |
-| --- | --- |
-| **Apply reviewed dev plan** succeeded | Its output-ID checks cover intended workload scope/topology; instructor confirms inventory privately |
-| Deployment finished | Request a **new**, separate `followup`; prior plan exit 0 is not this observation |
-| **Confirm no-change** succeeded | Fresh follow-up plan reported exit 0; no mutation is authorized by that result |
-| Cleanup requested | New `destroy` run, new destroy plan, separate independent `dev-apply` approval |
-| **Destroy reviewed dev plan** succeeded | Workflow confirms no managed addresses in workload state; instructor still confirms final inventory and retained owners |
+| Do | Why | Expected |
+| --- | --- | --- |
+| Verify apply output-IDs/instructor inventory | Scope | Correct topology |
+| Separate `followup` | No-change | Exit 0 **and Confirm no-change** success |
+| New independently approved full `destroy` | Mandatory cleanup | Same root/state; no targets |
+| Verify plan/destroy success | Closure | Empty managed state **and** final private inventory; shared RG/backend/identities/roles/runner retained with owners |
 
-Retain the shared RG, backend/container, identities, roles, and runner. Never
-delete state as cleanup. Failed, stale, moved-main, wrong-attempt, or uncertain
-runs need [recovery.md](recovery.md); **never rerun credentialled jobs**.
+Uncertain/failed cleanup stays open. No state deletion/local apply/destroy.
+Credentialled retry: **new run**, never **Re-run jobs**.
 
 ## Source attribution
 
-Original explanation grounded in [../.github/workflows/delivery.yml](../.github/workflows/delivery.yml),
-[../scripts/plan-policy.mjs](../scripts/plan-policy.mjs), [../scripts/delivery.mjs](../scripts/delivery.mjs),
-[../scripts/approval.cjs](../scripts/approval.cjs), and [../scripts/plan-envelope.mjs](../scripts/plan-envelope.mjs).
-Image provenance/license: [images/NOTICE.md](images/NOTICE.md) and [images/manifest.json](images/manifest.json).
-GitHub's source page for two reference images discusses reruns; **its rerun action
-is not permitted for this lab's credentialled delivery workflow**.
+[Workflow](../.github/workflows/delivery.yml), [policy](../scripts/plan-policy.mjs),
+[delivery](../scripts/delivery.mjs), [approval](../scripts/approval.cjs), [envelope](../scripts/plan-envelope.mjs).
+Images: [notice](images/NOTICE.md)/[manifest](images/manifest.json); no publisher rerun exception.

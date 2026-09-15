@@ -2,29 +2,26 @@
 
 [Repository landing](../README.md) · [Complete setup](00-start-here.md) · [Azure inputs and login](azure-setup.md) · [Simulation and verification](simulation.md)
 
-> [!IMPORTANT]
-> **Azure setup:** [enter your own tenant, subscription and existing RG](azure-setup.md#1-find-the-three-values-before-opening-the-terminal) · [Azure CLI login and current RG check](azure-setup.md#4-reuse-an-existing-login-or-sign-in-when-required). This complete guide covers read-only account/RG preparation, not provisioning authorization or new live evidence. Local quality checks and PR jobs remain credential-free.
+**Goal:** Review all five complete lessons; follow **your private copy's Exercise** for grading. This is a static mirror, not another exercise. Marker-bounded bodies preserve canonical text/examples, with only outside-fence Markdown links rebased. [Course manifest](../.github/agentalvine/course.json).
 
-This pack exposes the complete setup and all five activities in [the course manifest](../.github/agentalvine/course.json). It is a **static review copy**, not another exercise, bug-ticket list, or learner progress tracker. Lesson text is bounded by preservation markers; only Markdown relative links outside code fences are rebased. Commands, examples, and publisher attribution remain the lesson's own content.
+**Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](defender-posture-hands-on.md), the full guide with rebased links. Requires actual eligible deploy/followup in the existing approved writer; unexecuted instructions add no historical proof or automatic grade.
 
 > [!WARNING]
-> The complete live lessons are visible for review, **not authorized for execution**. Both original cycles verified only offline identity study: **A 1/5; B 1/5**. `WORKSHOP_AZURE_ENABLED=false`; no protected `main`, completed cloud preflight, or cloud run was claimed. The public template remains inert.
+> **Public templates remain inert; live Lab 07 is not solo.** Reading is not execution authorization. Preserve [all live controls](activity-02.md), independent deploy/destroy approvals and [mandatory full cleanup](activity-05.md). The separate AVM **4.81** profile is not connected to baseline **5.4.0** live delivery. No new live proof is claimed.
 
-## Learner route: one copy, one Exercise issue
+## Do — one copy, one Exercise
 
-1. Use the [complete setup guide](00-start-here.md) to create **one private copy**, clone its own URL, open that clone, and check tools and accounts. If the copy already exists, do not copy again. Offline study needs no earlier lab or Azure access.
-2. Open the **Exercise** link in **your private copy's README**. This is the live issue to follow, not the source preview below.
-3. Read the current activity. Make the real permitted edits, save, commit, and push; inspect actual Actions checks. Real PRs and independent reviews must follow the lesson's approved route, never a fabricated approval or an invented unprotected `main`.
-4. **AgentAlvine validates actual events and updates the SAME issue body**, including progress, feedback, and the next activity. Refresh that issue rather than making a ticket per activity.
-5. Actions implements AgentAlvine and the checks; it is **not a replacement for the issue-based learner experience**. Live delivery additionally requires the instructor's separate authorization and real protected-environment controls.
+1. Use [setup](00-start-here.md) to install tools/check accounts, create one **Private** copy, clone **its own URL**, and open that clone. Already copied? Do not copy again. No earlier lab or Azure account is needed offline.
+2. Open your copy's **Exercise**; start on `lab/identity`. Make permitted edits, save/commit/push, and inspect current Actions checks. Live work needs the instructor-approved protected-main route, never an invented branch or approval.
+3. Refresh the **same issue body**: AgentAlvine supplies feedback and the next activity automatically. No manual checkbox, run-ID submission or evidence PR.
 
-Editing checkboxes never awards work and never authorizes Azure. Do not create evidence PRs, submit run IDs, or use a recovery workflow to bypass a live prerequisite. The [catalogue](https://github.com/alvinea28/ws2-workshop-catalogue) is only a directory of independent laboratories.
+**Expected:** Offline identity study can advance; missing live prerequisites remain blocked. [Azure inputs/login](azure-setup.md) are optional account preparation, not provisioning permission; local/PR checks stay credential-free.
 
-**Recovery only if the Exercise is missing:** first inspect startup and [troubleshooting](../docs/troubleshooting.md#agentalvine-or-the-exercise-is-missing). In the actual private copy, use **Actions → AgentAlvine → Run workflow → Check progress**, selecting that copy's **actual default branch** (normally `dev`). Then open the issue from its README. Do **not** choose **Preview** for a learner, run trusted delivery for startup, invent an issue, or widen permissions. An existing issue with pending live work stays pending until its genuine prerequisites are met.
+**Recovery:** If Exercise is missing, inspect [startup troubleshooting](../docs/troubleshooting.md#agentalvine-or-the-exercise-is-missing), then only in your copy use **Actions → AgentAlvine → Run workflow → Check progress**, actual default branch (normally `dev`). This reconciles the guide; it does not run delivery or bypass pending gates. Never select learner Preview or create duplicate issues.
 
 ## Complete activity sequence and original A/B status
 
-Both original cycles were run on **2026-09-08**. “Verified” refers to the corresponding original private Exercise checkpoint, not completion in a new learner copy or the public source.
+**Historical, 2026-09-08: A 1/5; B 1/5.** `WORKSHOP_AZURE_ENABLED=false`; no protected main, completed cloud preflight or cloud run was claimed. “Verified” below is not a new learner's progress.
 
 | Activity | Complete lesson | Cycle A | Cycle B |
 | --- | --- | --- | --- |
@@ -35,16 +32,14 @@ Both original cycles were run on **2026-09-08**. “Verified” refers to the co
 | 04 | [Confirm a fresh no-change result](activity-04.md) | Pending applicable deployment and follow-up | Pending applicable deployment and follow-up |
 | 05 | [Review scoped destruction and retain shared resources](activity-05.md) | Pending reviewed live cleanup and inventory | Pending reviewed live cleanup and inventory |
 
-See [simulation.md](simulation.md) for whole-lab counts, rejection boundaries, and the instructor handoff. Fixtures and mocks cannot complete the four live activities.
+**Next:** [Activity 01](activity-01.md), or your Exercise's current activity. [Simulation evidence](simulation.md) retains original counts; mocks cannot complete live stages.
 
 ## Live public source preview — read-only, not learner progress
 
-Open [public source Exercise #1](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1) to review the real instructor **Preview**. The **2026-09-14 read-only GitHub observation** confirmed a successful Preview workflow and **step 0, with 0/5 participant progress**. That source issue never becomes a learner's progress record; after copying, follow the Exercise link in your own README. “Live” here means a real GitHub page, **not live Azure delivery**.
+The [source Exercise #1](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1) is instructor **Preview**, not learner grading. The **2026-09-14 read-only observation** confirmed step 0, **0/5**. “Live” means a real GitHub page, not Azure delivery.
 
 ![Actual Lab 07 public source Exercise preview — 2026-09-14, not a completed simulation](images/exercise-preview.png)
 
 *Captured on 2026-09-14 from the actual public GitHub Exercise #1: read-only instructor Preview, step 0 (0/5). [images/provenance.json](images/provenance.json) records the PNG SHA-256 and exact capture timestamp. This current source Preview is not a September 8 participant screenshot, either private 1/5 outcome, or Azure proof.*
 
-See the separate [fresh local verification results](simulation.md#fresh-2026-09-14-verified-results) for command-output evidence, not participant progress.
-
-Original private simulation records, immutable revisions, and actual offline Actions evidence are linked through the [private Lab 07 review](https://github.com/alvine-aurelio-org/ws2-public-rebuild-20260908-evidence/blob/dev/full-ws-content/lab-07/README.md). Screenshots supplement those records; they do not replace them.
+[Historical local verification](simulation.md#fresh-2026-09-14-verified-results) · [Original private Lab 07 records](https://github.com/alvine-aurelio-org/ws2-public-rebuild-20260908-evidence/blob/dev/full-ws-content/lab-07/README.md). Screenshots supplement records; they do not replace them.

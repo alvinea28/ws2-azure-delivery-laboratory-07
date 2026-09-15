@@ -6,74 +6,43 @@
 > **Review copy, not a second progress tracker.** The complete canonical lesson follows. Learners follow the live **Exercise issue in their own private copy**, opened from that copy's README; AgentAlvine updates the same issue body. The public source preview awards no learner progress. Reading later live lessons grants no Azure authorization.
 
 <!-- FULL-WS-LESSON:START -->
-> [!IMPORTANT]
-> **Already reading this in an Exercise issue or your own private copy? The copy is already created.** Do not create another repository. Skip only the copy-creation substeps below; continue with cloning/opening **this existing copy**, account checks and the first edit. If Git or desktop VS Code is not installed, use [the installation guide](../docs/toolchain.md) before cloning.
-
 # Lab 07 · Step 1 — Map identity and state without enabling Azure
 
-> [!WARNING]
-> **The public template is always inert.** A private copy is not automatically authorized for live work. This step is offline study and a note; no Azure sign-in, identity creation, state access, real backend initialization, local apply/destroy, or Copilot cloud tools are permitted.
+**Goal:** Separate workload permissions from state-lease permissions, then hand off an offline identity map.
 
-| Before you start | This step |
+| Working context | Selection |
 | --- | --- |
-| Goal | Explain least privilege and state leases, then hand the note to the instructor |
-| Start / working branch | Actual default branch, normally `dev` → `lab/identity` |
+| Branch | Actual default, normally `dev` → `lab/identity` |
 | Edit | [exercise/identity-map.md](../exercise/identity-map.md) only |
-| Included baseline | [module/main.tf](../module/main.tf), [vendor/network-baseline/main.tf](../vendor/network-baseline/main.tf), [module-lock.json](../module-lock.json) |
-| Read, do not initialize | [environments/dev/main.tf](../environments/dev/main.tf) and [environments/dev/backend.tf](../environments/dev/backend.tf) |
-| Tools | Node.js **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0**; provider-mocked offline checks |
-| Live prerequisite | [docs/instructor-preflight.md](../docs/instructor-preflight.md) and [docs/delivery-configuration.md](../docs/delivery-configuration.md), owned by the instructor |
+| Read only | [environments/dev/main.tf](../environments/dev/main.tf), [environments/dev/backend.tf](../environments/dev/backend.tf), [module-lock.json](../module-lock.json) |
+| Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0** |
 
-**Independent entry:** no earlier lab, module repository, release exercise, subscription, or deployment is needed for offline study.
-This copy already includes the complete module and a hashed vendor snapshot pinned to the real authoring checkpoint `4414e56b409a46785590741adcc48abea29905d7` in the same public Lab 07 source's `//module`. The [verified provenance guide](../docs/dependency-snapshot.md) explains the eight-file Git-object export. This is supplied reference provenance, not a participant release or a requirement to complete Lab 05.
-No new instructor repin is required for this offline study. Future source upgrades follow the instructor's reviewed repin procedure; a missing or inconsistent lock is a package blocker, never a learner task to invent a SHA or digest. Live authorization remains a separate instructor preflight.
+> [!WARNING]
+> **Public templates remain inert; keep `WORKSHOP_AZURE_ENABLED=false`.** No earlier lab or Azure account is needed. This step permits no Azure sign-in, identity creation, state access, real backend initialization, local apply/destroy, or Copilot cloud tools. Live Lab 07 is **not solo**: independent protected-workflow approval remains required.
 
-## 1. Create your own private copy in GitHub
+## Do
 
-1. Open GitHub in the browser; check the intended personal username through your profile-picture menu and accept any instructor invitation with that account.
-2. Open [the public Lab 07 template](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07). It is a source to copy, not a live writer.
-3. Select **COPY EXERCISE**, or **Use this template** → **Create a new repository**.
-4. Choose your account or the instructor-assigned organization in **Owner**; enter a unique name ending in `laboratory-07`.
-5. Select **Private**, leave **Include all branches** unchecked unless instructed otherwise, and select **Create repository**.
-6. Confirm the new owner/name and **Private** badge. Do not edit the public template, use a fork/ZIP, or assume the copy has a protected `main`.
-7. Refresh after materialization; open the **Exercise** link or **Issues** → the active **AgentAlvine** issue. Keep its body open for progress.
+### 1. Open your own copy once
 
-## 2. Clone and open this copy in desktop VS Code
+Already in your private copy's Exercise? **Do not copy again.** Otherwise [install tools and check accounts](../docs/start-here.md), then **COPY EXERCISE** from the [Lab 07 source](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07): intended Owner, unique `laboratory-07` suffix, **Private**, **Include all branches** off.
 
-1. In your private copy select **Code** → green **Code** → **HTTPS**, and copy its own credential-free URL.
-2. Open desktop VS Code, press **Ctrl+Shift+P** → **Git: Clone**, paste that own-copy URL, and press **Enter**. If using **Clone from GitHub**, choose your private copy, not the source.
-3. If a recognized authorization request appears, select **Allow**; verify the correct personal account in the trusted browser before authorizing VS Code or Git Credential Manager.
-4. Switch to the invited account if wrong, then authorize and choose **Open Visual Studio Code** when offered. Never paste credentials into the terminal or Chat.
-5. Choose a local **parent folder** as **Repository Destination**; Git creates the child clone folder. Select **Open** when cloning finishes.
-6. Trust only this known workshop repository, not the whole parent folder. Check **Explorer** is rooted at **this clone**, not a multi-lab parent, ZIP, or `github.dev`.
-7. If necessary use **File** → **Open Folder...** to open this clone itself in a separate window.
+Copy **your copy's Code → HTTPS URL**. In desktop VS Code: **Ctrl+Shift+P → Git: Clone**, paste it, authorize the correct account, choose a parent folder, then **Open** the clone. Trust only this repository; macOS uses **Cmd**.
 
-## 3. Check Copilot, authorship, and the doctor
-
-1. Open VS Code **Accounts** → **Sign in with GitHub to use GitHub Copilot**, if offered, and complete the trusted browser flow with your workshop personal account.
-2. In **Accounts** → **Manage Extension Account Preferences...**, select that account for Copilot. Check its status and ask the instructor to confirm the assigned **Copilot seat**.
-3. Use [start-here.md](../docs/start-here.md) for repository-local Git author name/email. Git authorship, browser login, Git credentials, and Copilot entitlement are distinct.
-4. Select **Terminal** → **New Terminal**. Check the prompt is this clone's root and run:
+Check **Accounts → GitHub Copilot**/seat and local Git authorship separately from browser/Git sign-in. In **Terminal → New Terminal** at the clone root:
 
 ```powershell
 node scripts/doctor.mjs
 ```
 
-5. Read every result. If the script is absent or a tool version differs, stop for [toolchain.md](../docs/toolchain.md) or instructor help. Do not improvise missing tooling or claim a pass.
+**Why:** `node` runs the [read-only doctor](../scripts/doctor.mjs): local tools/context, not account rights, seat or Azure readiness. Stop on failures.
 
 ![Microsoft reference showing the Accounts menu's Copilot sign-in entry](../docs/images/vscode-accounts.png)
 
-*REFERENCE — Microsoft publisher example, CC BY 3.0 US. The example account/status is not yours and does not prove a seat is assigned. [Sources and attribution](../docs/images/NOTICE.md).*
+*REFERENCE — Microsoft, CC BY 3.0 US; navigation example, not your account/seat. [Attribution](../docs/images/NOTICE.md).*
 
-The doctor is read-only and cannot certify browser sign-in, push rights, Copilot access, or live readiness. On macOS use **Cmd** instead of **Ctrl**; Linux uses **Ctrl**.
+### 2. Branch and write the map
 
-## 4. Create the offline branch and map roles without values
-
-1. In GitHub **Code** → branch dropdown, identify the actual default branch, normally `dev`.
-2. In VS Code **Source Control**, ensure a clean working tree; select that default branch and use **...** → **Pull**.
-3. Press **Ctrl+Shift+P** → **Git: Create Branch...**, enter `lab/identity`, and confirm the status bar.
-4. Press **Ctrl+P**, enter `exercise/identity-map.md`, and open it. If this requested note is missing, use **Explorer** → **New File** at the same path.
-5. Replace all `TODO` text with a role-and-scope explanation, not actual IDs, tenant values, tokens, or raw claims. Start from this Markdown:
+With a clean working tree, select the actual default branch and **Source Control → … → Pull**. Use **Ctrl+Shift+P → Git: Create Branch… → lab/identity**. Open the edit file with **Ctrl+P**; replace its `TODO` text with:
 
 ```markdown
 # Identity and state map
@@ -87,61 +56,35 @@ The doctor is read-only and cannot certify browser sign-in, push rights, Copilot
 Live readiness is pending instructor verification; this map enables nothing.
 ```
 
-6. Read the two instructor documents from the table above. Identify the following exact configuration fields without filling their values yourself:
+**Why:** Workload Reader does not supply the state data writes needed for a blob lease. Map roles, not real IDs or credentials. Instructor-owned settings and exact-subject federation are detailed in [delivery configuration](../docs/delivery-configuration.md).
 
-| Field | What the instructor must establish |
-| --- | --- |
-| `WORKSHOP_AZURE_ENABLED` | Remains disabled until all gates are verified; public template always inert |
-| `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | Authorized sandbox identity and subscription context, never guessed |
-| `AZURE_PLAN_CLIENT_ID`, `AZURE_APPLY_CLIENT_ID` | Separate OIDC identities; Reader versus Contributor at the existing workload RG |
-| `STATE_STORAGE_ACCOUNT`, `STATE_CONTAINER`, `STATE_KEY` | Explicit private backend and dev state boundary; both identities have container-scoped Storage Blob Data Contributor for leases |
-| `WS2_STATE_LOCK_ID` | State-specific concurrency identifier for the one designated writer; blob leases remain enabled |
-| `WORKLOAD_RG` | Existing assigned workload RG, not a newly created/shared-infrastructure target |
-| `WORKLOAD_INPUTS_JSON` | Exactly `name`, `resource_group_name`, `location`, `address_space`, `subnets`, `tags`; instructor-approved live ranges and tags |
-| `MODULE_APP_CLIENT_ID`, `MODULE_APP_PRIVATE_KEY` | Instructor-controlled, narrowly scoped module transport for trusted jobs, never learner PR credentials |
-| `PLAN_ENCRYPTION_PUBLIC_KEY`, `PLAN_DECRYPTION_PRIVATE_KEY` | Encrypted-plan controls; the private key is restricted to the apply environment and authorized reviewer escrow |
+### 3. Check the isolated baseline
 
-7. Explain that `resource_group_name` must match `WORKLOAD_RG`; tags include `environment: dev` and `workshop: ws2`. Do not substitute synthetic example values for assigned live values.
-8. State that actual authorized federation subjects may contain immutable identifiers. Never guess or create a live identity to make a mismatch disappear. Press **Ctrl+S**.
-
-## 5. Rehearse only through the isolated offline helper
-
-From this clone's root terminal, run:
+From the clone root:
 
 ```powershell
 node scripts/check-learner.mjs
 ```
 
-The helper verifies the source/lock and hashed vendor inventory, builds a disposable offline root without the canonical backend, and runs provider-mocked tests with the supplied read-only provider lock.
-**Expected result:** the two consumer cases actually execute and pass. This does not verify OIDC, RBAC, private networking, or an Azure deployment.
-Do not run real initialization in the canonical environment, pull state, call delivery scripts locally, use local apply/destroy, or let Copilot use cloud tools.
+**Why:** The [helper](../scripts/check-learner.mjs) verifies source/lock/vendor hashes and runs **two consumer mock cases** in a disposable backend-disabled root with read-only provider lock. Require both cases and overall success; downloads need internet, not Azure.
 
-## 6. Commit, push, and hand off without inventing main
+The supplied [snapshot](../docs/dependency-snapshot.md) pins `4414e56b409a46785590741adcc48abea29905d7` under `//module`; no earlier release lab or repin needed. Baseline **5.4.0** and AVM **4.81** are separate, not interchangeable live profiles.
 
-1. Open **Source Control** → the identity note's diff. Stage only that intended note with **+**, inspect **Staged Changes**, enter `lab: map identity and state boundaries`, and select **Commit**.
-2. Select **Publish Branch** to your copy's existing `origin`; subsequent corrections use **...** → **Push**.
-3. Refresh GitHub **Code** → `lab/identity` → the newest commit and compare the SHA/content. Open **Actions** → **Lab checks** at that SHA and inspect actual offline results.
-4. Refresh the existing **Exercise** issue body. AgentAlvine checks the map's exact role/field names and absence of `TODO`; it does not grant Azure authorization.
-5. **No sandbox, protected main, or instructor preflight?** Keep `lab/identity` pushed and give its private branch link to the instructor through the approved channel. Record **live work blocked/pending** in the existing exercise discussion.
-6. Do not create an unprotected `main`, open a PR to a missing `main`, or substitute `dev` for a live target.
-7. Only once the instructor provides the protected branch and review route may the note go through a same-copy reviewed PR into `main`. Keep delivery disabled during initial setup; once enabled, a `main` push itself can request deployment, so coordinate merges with the instructor.
+### 4. Publish the note and hand off
 
-## Expected result and stop conditions
-
-The map contains `Reader`, `Contributor`, `Storage Blob Data Contributor`, `lease`, `AZURE_PLAN_CLIENT_ID`, `AZURE_APPLY_CLIENT_ID`, `STATE_CONTAINER`, and `STATE_KEY`, with no `TODO`.
-Only the study checkpoint may advance. Before live work the instructor must prove private-copy status, current protected `main`, separate identities, private state access, a restricted allowed-workflow runner, main-only environments, independent encrypted-plan review, and no self-review or administrator bypass.
-Missing documentation, repin provenance, permissions, or any gate means **stop and record the blocker**. Fixtures and mock tests cannot complete the remaining four live steps.
-
-## Stuck?
-
-| Symptom | Safe recovery |
+| Where | Action |
 | --- | --- |
-| Instructor documents or verified public self-pin are unavailable | Record an incomplete-package blocker and ask the instructor; do not invent a release commit, lock, or digest |
-| No protected `main` or sandbox exists | Keep the pushed `lab/identity` note and hand it to the instructor; do not open a PR to a missing branch |
-| Offline helper asks for Azure or state | Stop and check that the approved root helper was used; do not initialize the canonical environment |
-| Map checkpoint passed but live jobs are skipped | Keep live work pending; a study checkbox never enables or authorizes delivery |
+| VS Code | **Ctrl+S**; inspect the note's diff; **+** stages only it; review **Staged Changes** |
+| Source Control | Commit `lab: map identity and state boundaries`; **Publish Branch** to existing `origin`, later **Push** |
+| GitHub | Compare newest branch SHA; inspect **Actions → Lab checks**; refresh your existing **Exercise** body |
 
-**Full beginner help:** [start-here.md](../docs/start-here.md) · [git-workflow.md](../docs/git-workflow.md) · [copilot-guide.md](../docs/copilot-guide.md) · [toolchain.md](../docs/toolchain.md) · [troubleshooting.md](../docs/troubleshooting.md).
+No protected `main`/sandbox? Hand the pushed branch to the instructor; do not invent `main` or substitute `dev`. Only an approved, reviewed protected-main PR may merge later. Coordinate merges: once enabled, a main push can request deployment.
+
+**Expected / gate:** The committed map contains all eight role/field terms shown above and no `TODO`. AgentAlvine advances only offline study; no manual checkbox, evidence PR or run-ID submission.
+
+**Recovery:** Missing files, provenance, tools or live controls mean **BLOCKED**; consult [troubleshooting](../docs/troubleshooting.md) and [instructor preflight](../docs/instructor-preflight.md). Never initialize the canonical backend or weaken gates.
+
+**Next:** [Step 2: live prerequisites and plan](activity-02.md). Without authorization, stop live work; independent Lab 08 remains available offline.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08
