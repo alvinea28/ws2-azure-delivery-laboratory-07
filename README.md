@@ -9,6 +9,9 @@
 
 ## Start here — five actions
 
+**Windows x64:** [prepare all tools and VS Code extensions in one go](https://github.com/alvinea28/ws2-workshop-catalogue/blob/dev/docs/windows-setup.md#2-paste-this-one-command)
+before cloning. Run once for all eight labs; after READY/restart, skip manual installs below.
+
 1. **Install / account:** follow [toolchain](docs/toolchain.md) for Git, desktop VS Code, Node **24.16.0**, Terraform **1.16.1**; AzureRM **5.4.0** is pinned. GitHub newcomer: **Sign up**, verify email, sign in and accept any instructor invitation.
 2. **Copy once:** use **COPY EXERCISE** below; keep a unique name ending `-laboratory-07`. Already in your private copy? Do not copy again; keep its Exercise.
 3. **Clone:** copy **your copy's Code → HTTPS URL**. In VS Code: **Ctrl+Shift+P → Git: Clone**, paste it, authorize the correct account in the trusted browser and choose a parent folder. macOS uses **Cmd**.
