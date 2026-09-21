@@ -95,13 +95,18 @@ git rev-parse HEAD
 
 **Protected live exception:** Lab 07 delivery targets only instructor-prepared protected `main` with its [identity, backend, runner and independent encrypted-plan approvals](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/docs/delivery-configuration.md). Missing readiness means **stay offline**; do not create unprotected `main`, substitute `dev`, enable Azure or rerun a live job. This exception does not change dev-only template maintenance.
 
+For the **source PR**, use the Lab 07 [author-merge policy](pr-author-merge.md):
+PR required, zero approving PR reviews, strict passing checks and conversations
+resolved. This removes only the separate PR-reviewer dependency, never the
+independent Azure environment reviewer.
+
 ![GitHub reference showing Compare and pull request](images/github-pull-request.webp)
 
 *REFERENCE — GitHub publisher example, not participant evidence. CC BY 4.0; [sources and attribution](images/NOTICE.md).*
 
 ## Obtain a real review and continue
 
-1. Open **Files changed** and inspect your own diff and **current-head checks**. Labs **01/05 educational PRs do not require an external course reviewer**: you may merge your own PR using your own account **if repository rules permit**. This is self-inspection, **not self-approval**; GitHub does not allow approving your own PR.
+1. Open **Files changed** and inspect your own diff and **current-head checks**. Under this Lab 07 [author-merge policy](pr-author-merge.md), approving PR reviews are **0**: resolve conversations and merge with your own account when the required checks pass. This is self-inspection, **not self-approval**; GitHub does not allow approving your own PR. Other labs and organization policies are not changed by this rule.
 2. If repository policy requires human approval, request an eligible nonauthor and wait. Address feedback on the same task branch and obtain any required fresh approval after edits. Do not impersonate reviewers, substitute AI approval, disable checks, change organization policy or use an administrator bypass.
 3. When the task requires merging and every enforced check/approval is satisfied, choose the permitted merge method and confirm the target/revision. **Expected:** a real merged PR, not merely a closed one. Refresh the same Exercise.
 4. With committed work and a clean tree, select the default branch and **Pull** before starting the next task.

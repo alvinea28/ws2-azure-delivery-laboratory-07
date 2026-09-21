@@ -22,18 +22,21 @@ While disabled: **Code → branch selector → View all branches → New branch*
 missing `main` from reviewed baseline. **Settings → General → Default branch → main
 → Update**; verify **Code**. Template maintenance: `dev`.
 
-**Settings → Branches → Add classic branch protection rule → main**
-(or equivalent active organization **Rules → Rulesets**):
+**Settings → Rules → Rulesets**: use the Lab 07
+[author-merge ruleset](pr-author-merge.md) for `refs/heads/main`.
+Committing its JSON is not installation; an authorized administrator must apply it.
 
 | Do | Why | Expected |
 | --- | --- | --- |
-| Require PR + ≥1 nonauthor approval; dismiss stale approvals; approve most recent reviewable push | Fresh review | No direct pushes |
+| Require PR; **0 required approving reviews**; Code Owner review and last-push approval off | Author inspects and merges after checks | No second PR reviewer or self-approval; no direct updates |
 | **Test learner module** (**Lab checks**), **kit** (**Workshop quality**); up-to-date branches; conversation resolution | Current checks | Select available contexts; fix failures, never drop gates |
 | **Do not allow bypassing the above settings**; force pushes/deletions **off** | Protect history | No administrator/actor bypass |
 
 PR checks: **no Azure/OIDC/App credentials/backend/state**, never live jobs.
-Instructor reviews workflows/scripts/provenance/security; **Code Owners** requires
-verified routing/support.
+The author inspects workflows/scripts/provenance/security. No Code Owner PR
+approval is required by this lab's source rule; an inherited organizational rule
+must still be respected and cannot be silently removed. Independent deployment
+environment approval remains mandatory.
 
 Both required check workflows run the [workflow-authoring checker](../scripts/check-workflow.mjs).
 Require [construction of the one canonical delivery workflow](workflow-authoring.md)
@@ -45,16 +48,18 @@ a learner bypass. Markdown explanations are not part of those control fingerprin
 ## 3. Review changes into protected main
 
 [Git route](git-workflow.md) → **Pull requests → New pull request**: **base: main**,
-**compare: task branch**. Instructor/nonauthor: **Files changed** (pin/snapshot/provider
-lock/controls) + current **Checks**. Deployment SHA must match protected merged-main PR,
+**compare: task branch**. Author: **Files changed** (pin/snapshot/provider
+lock/controls) + current **Checks**; resolve conversations and merge with the same
+account after the enforced checks pass. Deployment SHA must match protected merged-main PR,
 not bootstrap.
 
 ![GitHub reference showing the pull request Files changed tab](images/github-pr-files.webp)
 
 *GitHub reference, CC BY 4.0; not approval. [Attribution](images/NOTICE.md).*
 
-**Enabled main push = deploy**, not plan-only. PR review never replaces independent
-[saved-plan approval](plan-review.md). **Solo education in 01/05 never permits live 07 self-approval.**
+**Enabled main push = deploy**, not plan-only. Author-merging the PR never replaces
+independent [saved-plan approval](plan-review.md). **Zero source-PR approvals does
+not permit self-approval of an Azure apply or destroy job.**
 
 The **same run** performs hosted preflight and exact-SHA credential-free validation
 before privileged planning, then waits for independent `dev-apply` approval and

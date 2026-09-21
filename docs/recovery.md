@@ -80,8 +80,10 @@ tracking. Then fresh plan/property review/independent approval.
 
 ## 7. Correct code through the reviewed Git route
 
-[Git route](git-workflow.md): task branch → diff/checks → instructor/nonauthor review
-→ protected `main`. Preserve tests/source/lock/vendor/provider/controls; Copilot sees
+[Git route](git-workflow.md): task branch → author inspection/current checks/resolved
+conversations → [author-merged PR](pr-author-merge.md) → protected `main`. Zero PR
+approvals does not remove independent environment review of the new plan.
+Preserve tests/source/lock/vendor/provider/controls; Copilot sees
 sanitized source only.
 
 [New run/independent review](plan-review.md), never **Re-run failed jobs / Re-run all jobs**:

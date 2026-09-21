@@ -24,10 +24,11 @@ none authorizes another run. Mocks cannot prove publication/cloud readiness.
 | --- | --- | --- |
 | Administrator: verify licensed private host | Enforced gates | Missing controls → suitable private host, never public/weaker approval |
 | Instructor: own sandbox/identities/backend/runner/recovery | Accountability | One writer |
-| Source reviewer: inspect current diff/checks | Code review | Reviewed protected-main PR |
+| PR author: inspect current diff/checks and conversations | [Author-merge source rule](pr-author-merge.md) | PR required, zero approving PR reviews; current checks must pass |
 | Deployment reviewer: inspect this run's decrypted plan privately | Independent Azure decision | Approver cannot be run actor, triggering actor or associated merged-PR author; merger may need a third eligible human |
 
-Participants: offline work/blocker handoff, no enablement. **Solo education: 01/05 only; never live 07.**
+Participants: offline work/blocker handoff, no enablement. **Lab 07 source PRs may
+be author-merged; live Azure approval still cannot be self-approved.**
 
 ## 3. First-time setup, without touching Azure
 

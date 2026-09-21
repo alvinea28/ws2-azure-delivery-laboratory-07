@@ -78,7 +78,7 @@ inventory/hash mismatch, missing children, symlinks/escapes.
 | --- | --- | --- |
 | Source Control → Open Changes | Coherence | Source/revision/subdirectory/inventory/hashes/vendor together; relative children; backend/provider unchanged |
 | Section 3/rejection checks | Execution | Passing cases, no zeros/skips |
-| PR → Files changed / Checks | Nonauthor/instructor review | Live protected `main`; template maintenance `dev` |
+| PR → Files changed / Checks | Author inspection, strict checks and resolved conversations; [zero source-PR approvals](pr-author-merge.md) | Live protected `main`; independent environment approval remains; template maintenance `dev` |
 
 ![GitHub reference: Files changed tab](images/github-pr-files.webp)
 

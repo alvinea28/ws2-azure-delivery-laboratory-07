@@ -38,6 +38,10 @@ Select the intended Owner, keep **Private**, leave **Include all branches** off,
 
 ## Expected result / next
 
+**Source PRs:** [inspect and merge your own PR after required checks](docs/pr-author-merge.md).
+This Lab 07 policy requires zero approving PR reviews, not self-approval; independent
+Azure plan/apply/cleanup approvals remain mandatory.
+
 Refresh **your copy's Exercise link** and follow its current task, starting on `lab/workflow-authoring`. AgentAlvine updates the **same issue body** from real work/checks. No manual checkboxes, run IDs or evidence PRs; PR validation remains credential-free.
 
 **Required core tutorial:** [Construct the single delivery workflow](docs/workflow-authoring.md) during Step 1, with `WORKSHOP_AZURE_ENABLED=false`. The installed workflow is already complete; [solutions/delivery.yml](solutions/delivery.yml) is its non-runnable teaching reference. Reconstruct the canonical file, never a duplicate, then run `npm run workflow:check`. Step 2 observes an authorized **main push**, not another deploy dispatch; only followup/destroy are manual.
