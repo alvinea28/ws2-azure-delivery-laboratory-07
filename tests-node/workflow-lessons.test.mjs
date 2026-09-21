@@ -12,6 +12,15 @@ const read = async (path) => (await readFile(join(root, path), "utf8")).replaceA
 const { outsideCodeFences } = createRequire(import.meta.url)("../.github/agentalvine/auto-guide.cjs");
 const course = JSON.parse(await read(".github/agentalvine/course.json"));
 
+test("startup README replacement preserves every required beginner instruction outside the automation marker", async () => {
+  const readme = await read("README.md");
+  const start = readme.indexOf("<!-- AGENTALVINE:START -->");
+  const end = readme.indexOf("<!-- AGENTALVINE:END -->") + "<!-- AGENTALVINE:END -->".length;
+  assert.ok(start >= 0 && end > start);
+  const started = readme.slice(0, start) + "<!-- AGENTALVINE:START -->\n### Your exercise is ready\nStart here: your own Exercise issue.\n<!-- AGENTALVINE:END -->" + readme.slice(end);
+  for (const phrase of ["Git: Clone", "VS Code", "Copilot", "docs/start-here.md", "Private", "independent", "Public source template", "not the clone URL"]) assert.ok(started.includes(phrase), `Startup must retain ${phrase} outside the replaced block`);
+});
+
 function rebase(markdown, source) {
   return outsideCodeFences(markdown, (part) => part.replace(/\]\(([^)\s]+)\)/g, (match, href) => {
     if (/^(?:[a-z]+:|#)/i.test(href)) return match;

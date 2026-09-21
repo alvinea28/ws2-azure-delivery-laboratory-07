@@ -13,7 +13,7 @@
 before cloning. Run once for all eight labs; after READY/restart, skip manual installs below.
 
 1. **Install / account:** follow [toolchain](docs/toolchain.md) for Git, desktop VS Code, Node **24.16.0**, Terraform **1.16.1**; AzureRM **5.4.0** is pinned. GitHub newcomer: **Sign up**, verify email, sign in and accept any instructor invitation.
-2. **Copy once:** use **COPY EXERCISE** below; keep a unique name ending `-laboratory-07`. Already in your private copy? Do not copy again; keep its Exercise.
+2. **Copy once:** use **COPY EXERCISE** below, select **Private**, and keep a unique name ending `-laboratory-07`. Already in your private copy? Do not copy again; keep its Exercise.
 3. **Clone:** copy **your copy's Code → HTTPS URL**. In VS Code: **Ctrl+Shift+P → Git: Clone**, paste it, authorize the correct account in the trusted browser and choose a parent folder. macOS uses **Cmd**.
 4. **Open / accounts:** **Open** the clone; trust only it. Explorer must show this repository, not its parent/ZIP. Check **Accounts → GitHub Copilot**/seat; configure local Git authorship using [illustrated setup](docs/start-here.md). Authorship, Git credentials, browser login and Copilot entitlement differ.
 5. **Check:** open **Terminal → New Terminal** at this clone's root:
