@@ -4,6 +4,8 @@
 
 **Goal:** Review all five complete lessons; follow **your private copy's Exercise** for grading. This is a static mirror, not another exercise. Marker-bounded bodies preserve canonical text/examples, with only outside-fence Markdown links rebased. [Course manifest](../.github/agentalvine/course.json).
 
+**Required core tutorial:** [Construct the one protected delivery workflow](../docs/workflow-authoring.md), part of activities 01–02, not an optional extension. Use the [non-runnable complete reference](../solutions/delivery.yml), keep enablement false, and run the credential-free checker. Main push leads to same-run approved apply; only followup/destroy are manual. Historical outcomes below remain unchanged and do not attest this new task.
+
 **Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](defender-posture-hands-on.md), the full guide with rebased links. Requires actual eligible deploy/followup in the existing approved writer; unexecuted instructions add no historical proof or automatic grade.
 
 > [!WARNING]
@@ -12,7 +14,7 @@
 ## Do — one copy, one Exercise
 
 1. Use [setup](00-start-here.md) to install tools/check accounts, create one **Private** copy, clone **its own URL**, and open that clone. Already copied? Do not copy again. No earlier lab or Azure account is needed offline.
-2. Open your copy's **Exercise**; start on `lab/identity`. Make permitted edits, save/commit/push, and inspect current Actions checks. Live work needs the instructor-approved protected-main route, never an invented branch or approval.
+2. Open your copy's **Exercise**; start on `lab/workflow-authoring`. Construct the single disabled workflow, complete the identity map, save/commit/push, and inspect current Actions checks. Live work needs the instructor-approved protected-main route, never an invented branch or approval.
 3. Refresh the **same issue body**: AgentAlvine supplies feedback and the next activity automatically. No manual checkbox, run-ID submission or evidence PR.
 
 **Expected:** Offline identity study can advance; missing live prerequisites remain blocked. [Azure inputs/login](azure-setup.md) are optional account preparation, not provisioning permission; local/PR checks stay credential-free.

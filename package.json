@@ -9,6 +9,7 @@
     "test": "node --test .github/agentalvine/auto-guide.test.cjs scripts/doctor.test.mjs tests-node/*.test.mjs",
     "offline:prepare": "node scripts/prepare-offline.mjs",
     "kit:check": "node scripts/auto-kit.mjs",
+    "workflow:check": "node scripts/check-workflow.mjs",
     "graph:check": "node scripts/graph-check.mjs",
     "lab:check": "node scripts/check-learner.mjs",
     "doctor": "node scripts/doctor.mjs"

@@ -8,12 +8,13 @@
 <!-- FULL-WS-LESSON:START -->
 # Lab 07 · Step 1 — Map identity and state without enabling Azure
 
-**Goal:** Separate workload permissions from state-lease permissions, then hand off an offline identity map.
+**Goal:** Construct the single disabled delivery workflow and separate workload permissions from state-lease permissions, then hand off the tested YAML and identity map.
 
 | Working context | Selection |
 | --- | --- |
-| Branch | Actual default, normally `dev` → `lab/identity` |
-| Edit | [exercise/identity-map.md](../exercise/identity-map.md) only |
+| Branch | Actual default, normally `dev` → `lab/workflow-authoring` |
+| Edit | [exercise/identity-map.md](../exercise/identity-map.md) and the existing [.github/workflows/delivery.yml](../.github/workflows/delivery.yml) |
+| Teaching source | [solutions/delivery.yml](../solutions/delivery.yml), complete and outside the runnable workflow directory |
 | Read only | [environments/dev/main.tf](../environments/dev/main.tf), [environments/dev/backend.tf](../environments/dev/backend.tf), [module-lock.json](../module-lock.json) |
 | Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0** |
 
@@ -42,7 +43,7 @@ node scripts/doctor.mjs
 
 ### 2. Branch and write the map
 
-With a clean working tree, select the actual default branch and **Source Control → … → Pull**. Use **Ctrl+Shift+P → Git: Create Branch… → lab/identity**. Open the edit file with **Ctrl+P**; replace its `TODO` text with:
+With a clean working tree, select the actual default branch and **Source Control → … → Pull**. Use **Ctrl+Shift+P → Git: Create Branch… → lab/workflow-authoring**. Preserve any existing learner work; ask for synchronization help instead of resetting it. Open the identity map with **Ctrl+P**; replace its `TODO` text with:
 
 ```markdown
 # Identity and state map
@@ -58,33 +59,44 @@ Live readiness is pending instructor verification; this map enables nothing.
 
 **Why:** Workload Reader does not supply the state data writes needed for a blob lease. Map roles, not real IDs or credentials. Instructor-owned settings and exact-subject federation are detailed in [delivery configuration](../docs/delivery-configuration.md).
 
-### 3. Check the isolated baseline
+### 3. Construct the canonical workflow — required, not optional reading
+
+Follow [the complete workflow-authoring tutorial](../docs/workflow-authoring.md). The installed workflow is already complete: use the separate teaching reference to construct its sections in an untitled YAML buffer, then save the complete result into **the same canonical file**. Keep `WORKSHOP_AZURE_ENABLED=false`, all guards, exact action/tool pins and the existing helpers. Never install another main deployment file or commit a partial workflow.
+
+Explain the hosted `preflight` → same-SHA `validation` → trusted `plan` dependency in your map. Also explain main push → plan → independent `dev-apply` approval → **same-run apply**, without another deploy dispatch. Only followup/destroy are manual. Exact reconstruction may leave no YAML diff; do not manufacture one.
+
+### 4. Check the constructed workflow and isolated baseline
 
 From the clone root:
 
 ```powershell
+npm test
+npm run kit:check
+npm run workflow:check
 node scripts/check-learner.mjs
 ```
+
+**Why:** Node tests exercise both accepted and rejected control configurations; the kit checks the guide; the workflow checker requires the pinned reference plus exactly one canonical delivery workflow and three reviewed companions. Each command must pass. None enables Azure or completes a live gate.
 
 **Why:** The [helper](../scripts/check-learner.mjs) verifies source/lock/vendor hashes and runs **two consumer mock cases** in a disposable backend-disabled root with read-only provider lock. Require both cases and overall success; downloads need internet, not Azure.
 
 The supplied [snapshot](../docs/dependency-snapshot.md) pins `4414e56b409a46785590741adcc48abea29905d7` under `//module`; no earlier release lab or repin needed. Baseline **5.4.0** and AVM **4.81** are separate, not interchangeable live profiles.
 
-### 4. Publish the note and hand off
+### 5. Publish the offline work and hand off
 
 | Where | Action |
 | --- | --- |
-| VS Code | **Ctrl+S**; inspect the note's diff; **+** stages only it; review **Staged Changes** |
-| Source Control | Commit `lab: map identity and state boundaries`; **Publish Branch** to existing `origin`, later **Push** |
-| GitHub | Compare newest branch SHA; inspect **Actions → Lab checks**; refresh your existing **Exercise** body |
+| VS Code | **Ctrl+S**; inspect the workflow/map diffs; **+** stages only intended edits; review **Staged Changes** |
+| Source Control | Commit `lab: construct delivery workflow and map identity`; **Publish Branch** to existing `origin`, later **Push** |
+| GitHub | Compare newest branch SHA; inspect **Actions → Workshop quality** and **Lab checks**; refresh your existing **Exercise** body |
 
 No protected `main`/sandbox? Hand the pushed branch to the instructor; do not invent `main` or substitute `dev`. Only an approved, reviewed protected-main PR may merge later. Coordinate merges: once enabled, a main push can request deployment.
 
-**Expected / gate:** The committed map contains all eight role/field terms shown above and no `TODO`. AgentAlvine advances only offline study; no manual checkbox, evidence PR or run-ID submission.
+**Expected / gate:** The committed map contains all eight role/field terms shown above and no `TODO`; required workflow checks pass at the current SHA. The existing Step 1 gate still checks the map only, not authorship or deployment; this adds no new score. AgentAlvine advances only offline study; no manual checkbox, evidence PR or run-ID submission.
 
 **Recovery:** Missing files, provenance, tools or live controls mean **BLOCKED**; consult [troubleshooting](../docs/troubleshooting.md) and [instructor preflight](../docs/instructor-preflight.md). Never initialize the canonical backend or weaken gates.
 
-**Next:** [Step 2: live prerequisites and plan](activity-02.md). Without authorization, stop live work; independent Lab 08 remains available offline.
+**Next:** [Step 2: live prerequisites and the main-push plan](activity-02.md). Without authorization, stop live work; independent Lab 08 remains available offline.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08

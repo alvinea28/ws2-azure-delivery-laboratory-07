@@ -12,7 +12,9 @@ module.exports = async function approval({ github, context, core }) {
   const reviewed = sourcePRs.filter((pr) => pr.merged_at && pr.base.ref === "main" && pr.merge_commit_sha === context.sha);
   assert.ok(reviewed.length > 0, "The deployment commit must be linked to a merged reviewed main PR.");
   const authorIds = new Set(reviewed.map((pr) => pr.user.id));
-  const approval = reviews.find((item) => item.state === "approved" && item.environments?.some((environment) => environment.name === "dev-apply") && item.user?.type === "User" && !authorIds.has(item.user.id) && ![run.actor?.login, run.triggering_actor?.login, context.actor].includes(item.user.login));
+  const actorIds = new Set([run.actor?.id, run.triggering_actor?.id, context.payload?.sender?.id].filter(Number.isSafeInteger));
+  const actorLogins = new Set([run.actor?.login, run.triggering_actor?.login, context.actor].filter((login) => typeof login === "string").map((login) => login.toLowerCase()));
+  const approval = reviews.find((item) => item.state === "approved" && item.environments?.some((environment) => environment.name === "dev-apply") && item.user?.type === "User" && Number.isSafeInteger(item.user.id) && typeof item.user.login === "string" && !authorIds.has(item.user.id) && !actorIds.has(item.user.id) && !actorLogins.has(item.user.login.toLowerCase()));
   assert.ok(approval, "A real independent dev-apply environment approval is required; issue comments/manual dispatch are insufficient.");
   const { pathToFileURL } = require("node:url");
   const { resolve } = require("node:path");

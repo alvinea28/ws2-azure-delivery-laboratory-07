@@ -26,4 +26,5 @@ jobs:
       - name: Install pinned documentation tool when this lab needs it
         if: hashFiles('scripts/install-docs.mjs') != ''
         run: node scripts/install-docs.mjs
+      - run: npm run workflow:check
       - run: node scripts/check-learner.mjs

@@ -162,6 +162,8 @@ It cannot verify browser sign-in, Git write permission, a Copilot seat or Azure 
 1. Refresh **your existing Exercise issue body**. Read its branch, file links, acceptance criteria and next action; starter failures may be intentional.
 2. Follow [git-workflow.md](git-workflow.md) and the [approved learner checks](toolchain.md#run-only-the-approved-offline-checks). Return to the same issue after relevant pushes, checks, PRs or releases; do not copy every solution or submit evidence PRs/run IDs.
 
+**Lab 07 required first task:** on `lab/workflow-authoring`, [construct the canonical delivery workflow](workflow-authoring.md) while `WORKSHOP_AZURE_ENABLED=false`, alongside the identity map in [Step 1](../.github/steps/01.md). The existing workflow is complete and the separate teaching copy is non-runnable; do not create a duplicate deployment file or delete guards. Run the offline workflow checker before handing off. This phase needs no Azure account/login and does not complete any live gate.
+
 Labs **01/05** allow you to inspect your own diff/checks and merge your educational PR **where repository rules permit**, without an external course review requirement. GitHub does **not** allow self-approval; never bypass policy. **Lab 07 live delivery is not solo:** retain its [protected workflow and independent approvals](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/docs/delivery-configuration.md); otherwise stay offline.
 
 | Problem | Smallest recovery |

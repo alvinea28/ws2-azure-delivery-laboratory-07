@@ -35,6 +35,13 @@ PR checks: **no Azure/OIDC/App credentials/backend/state**, never live jobs.
 Instructor reviews workflows/scripts/provenance/security; **Code Owners** requires
 verified routing/support.
 
+Both required check workflows run the [workflow-authoring checker](../scripts/check-workflow.mjs).
+Require [construction of the one canonical delivery workflow](workflow-authoring.md)
+while disabled; its [complete reference](../solutions/delivery.yml) is outside the live
+workflow directory. Unknown or changed companion workflows fail closed, even if they
+look harmless. A legitimate control update needs reviewed code/reference pins, not
+a learner bypass. Markdown explanations are not part of those control fingerprints.
+
 ## 3. Review changes into protected main
 
 [Git route](git-workflow.md) → **Pull requests → New pull request**: **base: main**,
@@ -48,6 +55,11 @@ not bootstrap.
 
 **Enabled main push = deploy**, not plan-only. PR review never replaces independent
 [saved-plan approval](plan-review.md). **Solo education in 01/05 never permits live 07 self-approval.**
+
+The **same run** performs hosted preflight and exact-SHA credential-free validation
+before privileged planning, then waits for independent `dev-apply` approval and
+applies that saved plan. No second deploy dispatch; only followup/destroy are manual.
+Never count a disabled/template/branch-skipped run as live completion.
 
 ## 4. Create and protect both environments before any workflow use
 

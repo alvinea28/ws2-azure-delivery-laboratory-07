@@ -488,6 +488,8 @@ test("approval rejects author, rerunner, context-actor, bot, rejected or wrong-e
     ["wrong environment", (m) => { m.reviews[0].environments = [{ name: "dev-plan" }]; }], ["no environment", (m) => { delete m.reviews[0].environments; }],
     ["bot", (m) => { m.reviews[0].user.type = "Bot"; }],
     ["code author", (m) => { m.reviews[0].user.id = 11; m.reviews[0].user.login = "code-author"; }],
+    ["same actor ID with renamed login", (m) => { m.run.actor.id = 12; }],
+    ["same actor case-insensitive login", (m) => { m.reviews[0].user.login = "AUTHOR"; }],
     ...["author", "rerunner", "operator"].map((login) => [login, (m) => { m.reviews[0].user.login = login; }]),
   ]) {
     const f = approvalFixture(); mutate(f.model);

@@ -2,7 +2,7 @@
 
 **Public source template (not the clone URL after copying):** [alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) · **Recommended order:** 07 of 08 · **Time:** 45–60 minutes offline; live timing depends on instructor readiness
 
-**Goal:** Map identity/state offline, then understand the protected plan → review → apply → followup → destroy sequence. A complete module/snapshot is supplied; **no earlier lab or Azure account is needed for offline study**.
+**Goal:** Construct the one protected delivery workflow and map identity/state offline, then follow main push → validation → plan → independent review → same-run apply → followup → destroy. A complete module/snapshot is supplied; **no earlier lab or Azure account is needed for offline study**.
 
 > [!WARNING]
 > **Public templates remain inert. Live Lab 07 is not solo:** one approved private writer, protected current `main` and independent reviewers remain mandatory. [All live safeguards](.github/steps/02.md) still apply. Missing readiness means **BLOCKED**, not self-approval. After actual provisioning, [full reviewed cleanup](.github/steps/05.md) is mandatory; retain shared RG/backend/identities/runner.
@@ -38,7 +38,9 @@ Select the intended Owner, keep **Private**, leave **Include all branches** off,
 
 ## Expected result / next
 
-Refresh **your copy's Exercise link** and follow its current task, starting on `lab/identity`. AgentAlvine updates the **same issue body** from real work/checks. No manual checkboxes, run IDs or evidence PRs; PR validation remains credential-free.
+Refresh **your copy's Exercise link** and follow its current task, starting on `lab/workflow-authoring`. AgentAlvine updates the **same issue body** from real work/checks. No manual checkboxes, run IDs or evidence PRs; PR validation remains credential-free.
+
+**Required core tutorial:** [Construct the single delivery workflow](docs/workflow-authoring.md) during Step 1, with `WORKSHOP_AZURE_ENABLED=false`. The installed workflow is already complete; [solutions/delivery.yml](solutions/delivery.yml) is its non-runnable teaching reference. Reconstruct the canonical file, never a duplicate, then run `npm run workflow:check`. Step 2 observes an authorized **main push**, not another deploy dispatch; only followup/destroy are manual.
 
 [All five activities and historical outcomes](full-ws-content/README.md) · [Source Exercise #1: read-only Preview, zero learner progress](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1). Neither is a new learner's grade or live authorization.
 

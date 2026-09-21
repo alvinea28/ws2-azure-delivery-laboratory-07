@@ -7,21 +7,22 @@
 
 **Setup once:** [start-here.md](start-here.md) · **Settings:** [delivery-configuration.md](delivery-configuration.md) · **Recovery:** [recovery.md](recovery.md)
 
-## 1. Understand the five operations before opening Run workflow
+## 1. Understand events and operations
 
 Workflow: **Trusted dev delivery (instructor enablement required)**, baseline only.
-All operations: **Verify instructor gate configuration → Trusted dev plan**.
+First complete [required offline workflow construction](workflow-authoring.md).
+All live routes: **Verify instructor gate configuration → Validate reviewed delivery
+revision → Trusted dev plan** at the same checked-out event SHA.
 
 | Do | Why | Expected |
 | --- | --- | --- |
-| `plan` (default) | Observe only | Nondeployable artifact |
-| `deploy` / enabled main push | Reviewed mutation | **Apply reviewed dev plan** |
-| `followup` | Verify | **Confirm no-change**, separate exit 0 |
-| `destroy` | Full cleanup/new review | **Destroy reviewed dev plan** |
-| `drift` / schedule | Report only | Exit 2 → **Report drift without applying** |
+| Reviewed enabled **main push** → `deploy` | Plan, independent approval, then same-run mutation | **Apply reviewed dev plan**, no second dispatch |
+| Manual `followup` (menu default) | Verify | **Confirm no-change**, separate exit 0 |
+| Manual `destroy` | Full cleanup/new review | **Destroy reviewed dev plan** |
+| Schedule → `drift` | Report only | Exit 2 → **Report drift without applying** |
 
-Protected default `main`; schedule Tuesday **02:17 UTC**. No duplicate requests;
-dispatch is not independent approval.
+Protected default `main`; schedule Tuesday **02:17 UTC**. Only followup/destroy
+are manual menu options. No duplicate requests; dispatch is not independent approval.
 
 ```mermaid
 flowchart LR
@@ -44,8 +45,9 @@ Flow: plan → review → exact apply → separate followup → newly reviewed d
 
 | Do | Why | Expected |
 | --- | --- | --- |
-| Actions → delivery (not CodeQL) → Run workflow | Authorized operation | **main**, correct event/SHA, attempt **1** |
-| Read preflight/plan → Summary | Verify | Success, inventory, both digests; otherwise stop |
+| Actions → delivery (not CodeQL) → run from reviewed merge | Deployment | **push / main**, exact current SHA, attempt **1**; no second deploy dispatch |
+| Run workflow → main → followup or destroy | Separately authorized verification/cleanup | New run, attempt **1** |
+| Read preflight/validation/plan → Summary | Verify | All three successful; inventory, both digests; otherwise stop |
 
 ## 3. Interpret Terraform's detailed plan result correctly
 
@@ -112,7 +114,8 @@ Exclude run/triggering actor and merged-PR/code author; no bots/comments.
 The job verifies approval history/merged-main PR association.
 
 After approval: decrypt/check/init with [correct identity](identity-state.md),
-reverify source/main/age/digests, apply **same saved binary**.
+reverify source/main/age/digests, apply **same saved binary in this run**.
+No new deploy dispatch or implicit replanning occurs after approval.
 
 ## 7. Verify results without declaring premature completion
 
@@ -124,7 +127,10 @@ reverify source/main/age/digests, apply **same saved binary**.
 | Verify plan/destroy success | Closure | Empty managed state **and** final private inventory; shared RG/backend/identities/roles/runner retained with owners |
 
 Uncertain/failed cleanup stays open. No state deletion/local apply/destroy.
-Credentialled retry: **new run**, never **Re-run jobs**.
+Credentialled retry: **new authorized run**, never **Re-run jobs**. Deployment uses
+a newly reviewed main push; followup/destroy use a fresh authorized manual request.
+The driver checks scoped output IDs and named topology, not actual Azure configuration;
+destroy checks state emptiness, not final Azure absence. Instructor inventory is separate.
 
 ## Source attribution
 

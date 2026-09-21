@@ -21,7 +21,7 @@ single writer**, protected `main`.
 ## 2. Find the failing job without publishing sensitive logs
 
 Private **Actions → Trusted dev delivery (instructor enablement required)** → exact
-run → Summary: compare event/operation/SHA/attempt/status; [job map](plan-review.md#1-understand-the-five-operations-before-opening-run-workflow).
+run → Summary: compare event/operation/SHA/attempt/status; [job map](plan-review.md#1-understand-events-and-operations).
 Missing summary ≠ no mutation.
 
 ![GitHub reference: Actions tab](images/github-actions.webp)
@@ -43,6 +43,7 @@ repository concurrency cannot exclude other copies.
 
 | Do: inspect evidence | Why | Expected / prohibition |
 | --- | --- | --- |
+| Hosted validation/reference/inventory | Before credentials | Repair the reviewed source; run the [offline checker](workflow-authoring.md#3-check-the-constructed-code-locally-then-through-credential-free-ci); never skip validation or add a second writer |
 | Pin/subdirectory/App token | Fetch | Contents-read; public still requires App |
 | Source/lock/eight-file Git objects | Snapshot | Coherent reviewed refresh; no invented hashes |
 | OIDC issuer/audience/subject/context | Trust | Exact mapping; no wildcards/JWT logs/secret fallback |
@@ -85,6 +86,11 @@ sanitized source only.
 
 [New run/independent review](plan-review.md), never **Re-run failed jobs / Re-run all jobs**:
 credentialled attempt **1 only**. Solo Labs 01/05 never relax live approval.
+
+A separately authorized reviewed **main push** creates the fresh deploy run; do not
+dispatch another deploy or invent a fake change just to trigger it. Manual retries
+are limited to fresh followup/destroy requests. If there is no approved recovery
+change/run path, remain blocked with the instructor rather than bypassing freshness.
 
 ## 8. Close only what was actually verified
 

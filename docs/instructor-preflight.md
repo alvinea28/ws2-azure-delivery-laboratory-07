@@ -36,20 +36,42 @@ Terraform **1.16.1**, AzureRM **5.4.0**. Clone root; run separately, stop on fai
 
 ```powershell
 node scripts/doctor.mjs
+npm test
+npm run kit:check
+npm run workflow:check
 node scripts/check-learner.mjs
 ```
 
-**Why / flags:** both run Node helpers without extra flags. Doctor reads local
-readiness; learner checker verifies snapshot hashes and isolated backend-disabled mocks.
+**Why / flags:** doctor reads local readiness; Node tests exercise control rejection
+cases, kit checks guide integrity, workflow checking binds the installed YAML to its
+reviewed reference, and learner checking verifies snapshot hashes and isolated backend-disabled mocks.
 **Expected:** both consumer cases execute and pass; zero/skipped/errored tests are not
 success. Public provider downloads may need internet, never Azure credentials.
 [Recovery](dependency-snapshot.md#3-what-the-offline-learner-command-actually-does).
+
+Require [the core authoring tutorial](workflow-authoring.md), not optional reading:
+construct one canonical workflow on `lab/workflow-authoring` while disabled, using
+the complete non-runnable [reference](../solutions/delivery.yml). Review the checker,
+reference and helpers with the workflow; never update a digest merely to make it pass.
+Control fingerprints exclude pedagogical prose and historical evidence.
 
 ## 4. Configure GitHub deliberately
 
 Administrator follows [settings + reference images](delivery-configuration.md): protected
 default `main`, both environments, independent review, no self-review/admin bypass;
 exact-workflow runners, scoped variables/keys and App transport. Labels aren't gates.
+
+The actual delivery DAG is hosted **preflight → validation → privileged plan**;
+planning needs both predecessors to succeed. Hosted validation checks out the exact
+event SHA and runs the four offline checks with read-only permissions, no environment
+secrets/OIDC or trusted runner. PR checks remain hosted and credential-free. Do not
+replace this dependency with an unrelated successful PR run or an artifact from one.
+
+After separate authorization, reviewed **main push → plan → independent dev-apply
+approval → same-run apply** is the normal route. Only followup/destroy are manual;
+schedule remains report-only drift. Coordinate the first merge and have the reviewer
+ready before enabling. The existing Exercise timing gates still require later runs
+after preceding checkpoints; do not credit skipped jobs or rewrite historical scores.
 
 ## 5. Obtain the instructor-owned infrastructure prerequisites
 
@@ -84,7 +106,10 @@ extends validity. **New runs + fresh independent approval**, never credentialled
 | [Toolchain test](../tests-node/toolchain.test.mjs) | Actual [learner workflow](../.github/workflows/lab-checks.yml), Windows/Linux hashes, readonly-init guard. |
 | [Historical verification](daily%20work%20report/2026-09-15.md#recorded-verification) | **80/80 Node, 0 failed/skipped**; not rerun/cloud proof. |
 
-App transport/private gates/Azure integration **pending**. Private handoff:
+App transport/private gates/Azure integration **pending**. The driver verifies output-ID
+scope/topology and, after destroy, empty managed state; it does not perform independent
+ARM configuration or final resource-absence reads. Require those actual observations
+in a separately authorized live rehearsal. Private handoff:
 verifier/date/revision/results/blocker owners; no actual IDs/secrets/private links/raw
 screenshots here. Automatic AgentAlvine Exercise updates, no evidence PR/manual progress.
 
