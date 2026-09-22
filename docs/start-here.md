@@ -162,22 +162,19 @@ It cannot verify browser sign-in, Git write permission, a Copilot seat or Azure 
 1. Refresh **your existing Exercise issue body**. Read its branch, file links, acceptance criteria and next action; starter failures may be intentional.
 2. Follow [git-workflow.md](git-workflow.md) and the [approved learner checks](toolchain.md#run-only-the-approved-offline-checks). Return to the same issue after relevant pushes, checks, PRs or releases; do not copy every solution or submit evidence PRs/run IDs.
 
-**Lab 07 required first task:** on `lab/workflow-authoring`, [construct the canonical delivery workflow](workflow-authoring.md) while `WORKSHOP_AZURE_ENABLED=false`, alongside the identity map in [Step 1](../.github/steps/01.md). The existing workflow is complete and the separate teaching copy is non-runnable; do not create a duplicate deployment file or delete guards. Run the offline workflow checker before handing off. This phase needs no Azure account/login and does not complete any live gate.
+### Lab 07 — continue inside the existing five steps
 
-### Lab 07 hands-on activity — what to do next
-
-| Phase | Action / expected result |
+| Step | Action |
 | --- | --- |
-| Create Actions in VS Code | **File → New Text File → YAML**; build header, preflight, validation, plan, automatic apply, followup/drift from the non-runnable solution; replace only the complete canonical file in one save while false |
-| Check and explain | Complete the identity map; run `npm test`, `npm run kit:check`, `npm run workflow:check` and the two consumer mocks; inspect **Workshop quality / Lab checks** at the current SHA |
-| Owner readiness, not a learner toggle | Inspect actual settings and secret names with the owner; obtain target, budget/currency, lifetime and bootstrap authorization; verify OIDC, state/leases, runner, keys and module App |
-| Authorized private lifecycle | Passing PR → protected main → same-SHA validation → encrypted saved plan → automatic exact apply; [verify real configuration and a benign HCL update](workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update), same IDs/no replacement → fresh followup exit 0 → separately authorized cleanup |
+| [1](../.github/steps/01.md) | On `lab/workflow-authoring`, map identity and construct the complete Actions workflow; run all four offline checks |
+| [2](../.github/steps/02.md) | Confirm owner readiness; author merges the real PR and observes the first plan/apply |
+| [3](../.github/steps/03.md) | Publish the explanation-note PR; inspect the later apply and actual Azure configuration |
+| [4](../.github/steps/04.md) | Make one approved tag update through PR/apply, then request fresh followup |
+| [5](../.github/steps/05.md) | Current admin separately authorizes full cleanup; verify Azure absence and retained resources |
 
-Labs **01/05** allow self-inspection and educational PR merges where rules permit. This exact private Lab 07 route also lets the author merge after strict checks and resolved conversations, with zero required approving reviews, not GitHub self-approval. [Scoped automatic exact-plan delivery](delivery-configuration.md) has **no manual deployment reviewer**. Main-only **dev-plan / dev-apply** have no Required reviewers and no admin bypass; OIDC, locked state, encrypted plans and restricted runners remain mandatory.
+No separate Actions activity or earlier lab is required. Keep `WORKSHOP_AZURE_ENABLED=false` until owner readiness; public/unapproved copies remain offline. Missing protected main means STOP, not a branch workaround. Only the owner establishes it while disabled after readiness review. Source maintenance stays on dev; never repin eligibility.
 
-Only the exact approved private identity in [delivery configuration](delivery-configuration.md) is eligible. Public templates and unapproved copies remain inert; do not edit or repin the allowlist. This setup guide is not a new readiness readback. Keep false and default dev; do not invent values, open a PR into nonexistent main or create it while unready. The owner establishes protected main while disabled only after baseline/readiness review. A protected-main default for scheduled drift is a separate deliberate choice when ready, never automatic.
-
-After real enablement, main push → validation → saved plan/encryption → automatic same-run exact-plan apply. Delivery dispatch offers **followup only**. The authenticated current repo admin separately authorizes full owned-scope cleanup and dispatches [cleanup.yml](../.github/workflows/cleanup.yml) with required string `authorization` = `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`, no operation input or independent cleanup reviewer. Same state/concurrency/environments/identities; retain shared RG/backend/identities/runner. Ordinary main never cleans up. AgentAlvine only observes/guides; educational progress is not Azure authorization. Public templates stay inert on dev.
+AgentAlvine only observes/guides; progress is not Azure authorization. No manual deployment reviewer is required, but scope/budget/lifetime/bootstrap and separate cleanup authorization remain owner decisions. [Owner configuration](delivery-configuration.md) is reference, not a new lesson or readiness observation.
 
 | Problem | Smallest recovery |
 | --- | --- |

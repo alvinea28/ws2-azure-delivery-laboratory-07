@@ -8,84 +8,56 @@
 <!-- FULL-WS-LESSON:START -->
 # Lab 07 · Step 3 — Explain and observe automatic exact-plan deployment
 
-**Goal:** Explain why automatic apply consumes only this run's fresh saved plan, then observe the real protected-main result.
+**Goal:** Commit the exact-plan note, observe a later real apply, and inspect Azure properties.
 
-| Working context | Selection |
-| --- | --- |
-| Branches | Note: `lab/plan-review` from current reviewed `main`; live: protected `main` in the approved private writer |
-| Edit | [exercise/plan-review.md](../exercise/plan-review.md) only |
-| Workflow | **Trusted dev delivery (instructor enablement required)** / main push automatically selects `deploy` |
-| Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0**; unchanged locks |
+Keep every [Step 2 prerequisite](activity-02.md); public/unapproved copies remain offline. No local apply, state access, reviewer wait or credentials in PR checks.
 
-> [!WARNING]
-> **Public templates remain inert; no manual deployment reviewer.** Reconfirm every [Step 2 prerequisite](activity-02.md) and [instructor preflight](../docs/instructor-preflight.md). The author may merge after strict checks and resolved conversations, with zero required approvals, not fabricated self-approval. No admin bypass, learner enablement, local real init/state/apply/destroy or Copilot cloud tools. Missing readiness means **BLOCKED**.
+### 1. Write your note after Step 2
 
-## Do
-
-### 1. Write the exact-plan explanation
-
-After Step 2 is recorded, create `lab/plan-review` from the current reviewed `main` using **Git: Create Branch…**; obtain synchronization help rather than resetting existing work. Open the note with **Ctrl+P**. The unfinished `TODO` starter is not proof of your work: write the complete current explanation below in your own words. Preserve any real learner work and reconcile it with this policy rather than overwriting it blindly.
+After Step 2 is recorded, create **lab/plan-review** from **current main** in VS Code. Edit only [exercise/plan-review.md](../exercise/plan-review.md); preserve existing learner work, remove `TODO`, and explain these points:
 
 ```markdown
 # Exact-plan review
-A fresh plan is created for this run's reviewed code, inputs, module, and state.
-The saved-plan digest and manifest digest must both match the trusted summary.
-Bindings include repository, source SHA, run ID/attempt, operation, dev root,
-tenant/subscription, separate identities, workload RG, backend account/container/key,
-provider/module locks, input hash, and the pinned Terraform/provider versions.
-The maximum age is 2 hours; 1 day artifact retention does not extend that limit.
-Protected-main validation and planning lead to automatic exact-plan apply in this run.
-Both environments are main-only with no Required reviewers and no admin bypass.
-Fresh checks bind the exact private repo, live rules, current main, run/SHA/attempt,
-merged PR, successful same-run validation/plan and environments; no approvals API.
-Full cleanup requires separate cleanup authorization and the current repository
-admin's explicit dispatch, not an ordinary main push or a second reviewer.
-Changed bindings, a moved main, expired plans, or reruns require a new authorized run
-and a fresh exact plan. This note is not Azure authorization or proof of deployment.
+A fresh plan binds this run's reviewed SHA, inputs, module and owned state.
+The saved-plan digest and manifest digest must match the trusted summary.
+The maximum age is 2 hours; 1 day artifact retention does not extend validity.
+Protected-main validation and planning lead to automatic exact-plan apply
+of those saved bytes in the same run, without replanning or a reviewer wait.
+Full destruction needs separate cleanup authorization from the current
+repository admin. Neither this note nor Exercise progress authorizes Azure.
 ```
 
-**Why:** Digests/bindings identify the saved plan; notes and educational progress do not authorize Azure mutation. Preserve the already-recorded identity-map step; this note does not manufacture live completion.
+### 2. Publish the real note PR
 
-### 2. Commit and use the protected PR route
+Repeat [Step 1's four offline checks](activity-01.md#4-run-offline-checks-and-publish). **Source Control → inspect diff → Stage Changes** for the note only → **Commit → Publish Branch/Push**. GitHub **Pull requests → New pull request → base: main → compare: lab/plan-review**. Inspect **Files changed**, wait for current checks, resolve conversations, then **Merge pull request → Confirm merge** as the author.
 
-| Where | Action |
+### 3. Observe this later exact-plan run
+
+Open **Actions → Trusted dev delivery (instructor enablement required)** and this later **push / main** run: current SHA, **attempt 1**. After scoped preflight and same-SHA validation, **Trusted dev plan → Apply exact dev saved plan** must succeed in the **same run**. No Step 2 artifact reuse, no second deploy dispatch and no credentialled rerun. Keep plan/state contents and decryption keys private.
+
+![GitHub reference: open Actions](../docs/images/github-actions.webp)
+
+*REFERENCE — GitHub, CC BY 4.0; navigation, not Azure evidence. [Attribution](../docs/images/NOTICE.md).*
+
+### 4. Inspect the actual Azure configuration
+
+With authorized access, open [Azure portal](https://portal.azure.com) → **Directories + subscriptions → assigned directory/subscription → Resource groups → assigned RG → actual VNet / NSG**. Obtain names from the owner/run's scoped outputs, **not guessed names**.
+
+| Click | Compare with the reviewed configuration |
 | --- | --- |
-| VS Code | **Ctrl+S**; inspect diff; **+** stages only the note; inspect **Staged Changes** |
-| Source Control | Commit `lab: describe exact-plan review`; **Push**, or first **Publish Branch** to existing `origin` |
-| GitHub | Verify newest SHA and credential-free **Workshop quality / Lab checks**; **Pull requests → New pull request**, same-copy **base: main**, **compare: lab/plan-review** |
-| PR | Inspect **Files changed** and current-head checks; resolve conversations and merge your own passing PR under the [author-merge rule](../docs/pr-author-merge.md), with no separate PR reviewer |
+| VNet / NSG **Overview**, **JSON View** if needed | Exact resource ID, approved region, `provisioningState: Succeeded` |
+| VNet → **Address space** | Approved address-space CIDRs |
+| VNet → **Subnets** → each subnet | Stable keys/names, prefixes and NSG associations |
+| VNet → **JSON View** → `properties.subnets` | Each subnet's `defaultOutboundAccess: false` |
+| NSG → **Inbound security rules / Outbound security rules** | Direction/access/priority/protocol/ports/source/destination match reviewed inputs/module |
+| NSG → **Subnets** | Associations match the VNet's subnet list |
+| VNet / NSG → **Tags** | All required tags and values match approved inputs |
 
-Absent main or unready scope means stop, not a PR into a nonexistent branch. Only the owner establishes protected main while disabled after baseline/readiness review. Confirm current main's actual merged-PR association. Feedback needs fresh checks. Coordinate enabled main pushes: they automatically apply saved plans, not cleanup.
+Compare resource IDs with the run and keep observations private. Subnets are nested, not separate RG rows. Green Actions and output IDs are **not actual configuration proof**. Make the single benign update only in [Step 4](activity-04.md).
 
-### 3. Open the fresh main-push deployment run
+**Expected:** The complete note and actual completed current-SHA plan/apply run, after course start/Step 2, satisfy the unchanged gate; fixtures, skipped/old jobs or combined runs do not. Portal observations remain separate from AgentAlvine's metadata.
 
-After the authorized merge, inspect **Code → main → latest commit**. Open **Actions → Trusted dev delivery (instructor enablement required)** and the run created by that merge's **push / main** event. Verify SHA/attempt **1**. **Do not dispatch a second deploy:** the push already requests fresh planning and same-run apply. Never **Re-run jobs** or reuse Step 2's artifact.
-
-Require **Verify scoped dev deployment policy**, **Validate reviewed delivery revision** and **Trusted dev plan** to succeed. **Apply exact dev saved plan** runs automatically in `dev-apply`, with no reviewer wait. This later reviewed push is required by the existing Step 3 checkpoint's time boundary; it is not an extra manual deploy button for Step 2's run.
-
-![GitHub reference highlighting the Actions tab](../docs/images/github-actions.webp)
-
-*REFERENCE — GitHub, CC BY 4.0; navigation, not deployment evidence. [Attribution](../docs/images/NOTICE.md).*
-
-### 4. Observe scoped authorization and exact-plan application
-
-Read [saved-plan handling](../docs/plan-review.md), not an approval-button procedure. The historical [approval.cjs](../scripts/approval.cjs) delegates to [deployment-authorization.cjs](../scripts/deployment-authorization.cjs). It freshly checks private **alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07**, ID **1379149907**, current live rules/main/run/SHA/attempt, merged PR, both environments and successful same-run validation/plan. Wrong IDs/public/templates fail; no approvals API or independent reviewer is required.
-
-Inspect property-level changes/outputs—not sanitized addresses alone. Limit scope to assigned VNet/subnets/NSG/rules/associations in the existing RG; reject shared infrastructure/broader access. Confirm unchanged protected main/inputs/state/dependencies, age ≤ **2 hours**. **1 day** encrypted-artifact retention never extends validity. No keys, tokens, plaintext plans/state or sensitive images in Git/issues/Chat.
-
-Inspect the sanitized job summaries and both digests without publishing sensitive plan contents. Authorized owner inspection/recovery escrow is optional, not a manual deployment gate. The apply stage verifies encryption, integrity, expiry and bindings automatically; it may not create a replacement plan. Unexpected deletion/replacement on an ordinary push fails.
-
-### 5. Observe apply and the gate
-
-**Apply exact dev saved plan** rechecks current main, scoped authorization, digests, bindings and age immediately before applying the saved plan, without silently replanning. The driver checks scoped output IDs and named topology, not actual Azure configuration. Have the instructor verify real configuration/inventory; refresh the existing Exercise after completion. AgentAlvine only reads metadata and guides; it has no cloud tokens or execution authority.
-
-**Hands-on verification before followup:** with authorized access, open **Azure portal → Resource groups → assigned RG → VNet / NSG** and compare actual address spaces, named subnet prefixes, NSG associations/rules and required tags with reviewed inputs. Then perform the [owner-approved benign HCL tag update](../docs/workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update) through a passing PR/main push: expect in-place updates, **no replacement** and the **same resource IDs**, then verify the changed property in Azure. This is not a new checkpoint or proof supplied by the output-ID summary. Missing actual observation stays unverified.
-
-**Expected / gate:** Note contains `fresh plan`, `digest`, `2 hours`, `automatic exact-plan apply`, `separate cleanup authorization`, no `TODO`; successful same-repository current-SHA main run, attempt **1**, after course start/preceding checkpoint, with **Trusted dev plan** and **Apply exact dev saved plan** both successful in the same run—not skipped, fixtures, older jobs or jobs combined from different runs.
-
-**Recovery:** Record a sanitized blocker. Moved main, expired plan or changed binding requires a newly authorized reviewed main push and fresh exact plan, never reruns, fake trigger-only edits, edited manifests, disabled locks or broader roles. Delivery offers followup only; cleanup requires its dedicated admin-authorized dispatch, required string authorization and no operation input.
-
-**Next:** [Step 4: fresh followup](activity-04.md), then mandatory separately authorized cleanup. Apply success alone proves neither.
+**Recovery:** Stop on mismatches; ask the owner to reconcile. Changed/expired bindings need a fresh authorized plan, never edited manifests, broader roles or reruns.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08

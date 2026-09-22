@@ -1,6 +1,6 @@
 # Lab 07 · Construct the one protected delivery workflow
 
-**Required core task in [Step 1](../.github/steps/01.md), continued in [Step 2](../.github/steps/02.md).** This is not an optional reading exercise or a new numbered course. You construct YAML, run rejection-tested local checks, and review the result before any separately authorized live merge.
+**Optional reference.** Required actions are inline in [Step 1](../.github/steps/01.md) through [Step 5](../.github/steps/05.md), not a separate activity. Follow that sequence once; do not repeat its tag update from this reference.
 
 **Goal:** construct [the canonical delivery workflow](../.github/workflows/delivery.yml) on `lab/workflow-authoring` while `WORKSHOP_AZURE_ENABLED=false`, then explain how one approved main push leads to validation, saved plan/encryption and automatic same-run apply of those exact bytes.
 
@@ -141,7 +141,7 @@ Delivery's manual choice is **followup only**. The current authenticated repo ad
 
 Scheduled drift is requested on the default branch each Tuesday at 02:17 UTC and is report-only. Keep the offline default **dev**: only when ready may the owner deliberately choose protected main as default. There is no automatic change. Disabled or non-main scheduled jobs skip; this is not drift or deployment evidence. Use credential-free quality and learner checks for offline feedback, not the weekly schedule.
 
-**Timing matters:** before the first enabled merge, read [Step 3's exact-plan observations](../.github/steps/03.md#4-observe-scoped-authorization-and-exact-plan-application). Step 2's grader waits for a completed eligible run, not merely a successful plan in an unfinished run. After Step 2 is recorded, Step 3's explanation-note PR creates a **later reviewed main push** and fresh same-run plan/apply; an older run cannot satisfy a later checkpoint. Step 5 observes the dedicated cleanup workflow, not a delivery destroy job. The original first-step acceptance and recorded completions are not rewritten or awarded by this alignment.
+**Timing matters:** before the first enabled merge, read [Step 3's exact-plan observations](../.github/steps/03.md#3-observe-this-later-exact-plan-run). Step 2's grader waits for a completed eligible run, not merely a successful plan in an unfinished run. After Step 2 is recorded, Step 3's explanation-note PR creates a **later reviewed main push** and fresh same-run plan/apply; an older run cannot satisfy a later checkpoint. Step 5 observes the dedicated cleanup workflow, not a delivery destroy job. The original first-step acceptance and recorded completions are not rewritten or awarded by this alignment.
 
 After an approved apply, the driver checks output-ID scope and named topology. It does **not** independently query Azure to verify deployed configuration or final resource absence. The instructor must observe actual configuration, an approved harmless Terraform update through another reviewed main push, fresh no-change, and final cleanup inventory in a separately authorized live rehearsal. Mocks, screenshots of reference material and skipped jobs are not that proof.
 

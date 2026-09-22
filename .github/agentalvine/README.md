@@ -1,17 +1,23 @@
 # AgentAlvine automatic lab toolkit
 
-Original implementation inspired by the GitHub Skills copy → issue → activity → next-step pattern. The learning UI is the short README and **one updated issue body**, not a folder of evidence forms or a manual check command.
+Use [independent setup](../../docs/start-here.md), then your own private copy's **one Exercise body**. AgentAlvine updates instructions/progress from real work; no manual checkboxes, evidence PRs or run-ID submissions.
 
-- Copying a non-template repo triggers startup. The guide creates the issue and replaces the README start marker with its link.
-- Pushes, issues, PRs/reviews, releases and completed CI trigger checks. Current task/checklist/feedback are updated in place. Comments are only brief history notices.
-- Reporter checks out **only the default branch** and reads learner files via the contents API at immutable SHAs. It never runs Terraform/student scripts or reads their artifacts. Separate hosted read-only CI validates code with no Azure/OIDC/state/secrets.
-- Links to learner artifacts use that observed SHA, including authored API docs and workflow files. Supplied solution/exercise/script/instructor references remain on the trusted default branch. Lesson code is never loaded from a PR.
-- Pending Actions events can be coalesced even with cancellation disabled. A surviving event reconciles consecutive satisfied checks at one immutable revision, stops at the first unmet requirement, and never grants progress merely because an event existed. A completed same-copy current-default push-CI event can recover a lost startup; live branch-head validation rejects stale/fork events while allowing newer CI after a lost push.
-- Prose matching is case-sensitive unless a specific Markdown file check opts into `caseInsensitive`. HCL, JSON answers, regex structure and security/approval checks remain exact. Missing-text feedback names the unmet literal rather than a generic part.
-- Lab 4's published `node scripts/generate-docs.mjs` command and its read-only `--check` use one pinned terraform-docs renderer. Authoring verification exercises that exact command twice and rejects stale/wrapped output; copying a finished reference table is not sufficient verification.
-- Template maintenance is inert. Instructor Preview creates a clearly labelled non-grading demonstration. Copied repositories use the actual default branch; no mandatory branch rename for offline labs.
-- README updates respect branch protection; if blocked, the issue still works through Issues. Settings without Actions events have a single optional Check progress fallback.
-- Lab 7 retains five checkpoints: the original committed identity map, then actual current-SHA plan, automatic exact-plan apply, fresh no-change and dedicated cleanup jobs. Step 1 also requires hands-on canonical workflow construction; this does not add a point or fabricate authorship. Only the exact approved private identity can deploy after owner readiness; public templates and other copies stay inert.
-- Delivery completion and **Trusted dev cleanup (explicit owner authorization required)** completion trigger this metadata-only observer. It loads the trusted default branch, rejects stale/skipped/fork/rerun or wrong-workflow records, and never combines jobs from different runs. It does not inspect Azure configuration or prove resource absence. A changed reviewed module/input marker reopens a completed delivery issue with a new cycle; baseline runs cannot prove a later capstone.
+## Five existing lessons
 
-Numbered Revision 4 source templates are **public** under alvinea28; participants create their own **private** copies and need available Actions minutes. Each package includes its own detailed clone/open/account/tool setup, read-only doctor and attributed publisher reference screenshots. First-issue onboarding uses the actual participant copy URL; reference images load from the public source's explicit dev branch, not an inaccessible private image URL. Markdown code fences remain verbatim during lesson-link rendering. Lab 7's [workflow-authoring activity](../../docs/workflow-authoring.md) is required offline work; advanced owner configuration is a separate conditional phase. Workshop progress is educational feedback, not Azure authorization. The approved automatic route has no manual deployment reviewer; target/budget/lifetime/bootstrap and separate current-admin cleanup authorization remain real owner decisions. AgentAlvine never dispatches delivery, has no cloud tokens and cannot grant those decisions.
+| Step | Inline actions |
+| --- | --- |
+| [1](../steps/01.md) | Setup, identity map, complete Actions construction and offline checks |
+| [2](../steps/02.md) | Owner readiness, real PR merge and first plan/apply |
+| [3](../steps/03.md) | Later note PR/apply and Azure portal configuration |
+| [4](../steps/04.md) | One tag update, real readback and fresh followup |
+| [5](../steps/05.md) | Separate admin-authorized cleanup and Azure absence |
+
+The same five checkpoints remain: committed identity map; actual plan; note plus same-run plan/apply; no-change; dedicated cleanup. Construction and portal observations add no check or award. `lessonPresentation: concise` changes presentation only.
+
+## Observer boundaries
+
+- This metadata-only observer loads the trusted default branch and reads learner files at immutable SHAs; it never executes PR code or downloads plans/state.
+- Delivery and **Trusted dev cleanup (explicit owner authorization required)** completion events are observed. Stale, skipped, fork, rerun and wrong-workflow records cannot substitute; jobs from different runs are never combined.
+- It does not inspect Azure configuration or prove resource absence. AgentAlvine never dispatches delivery, has no cloud tokens, and never authorizes Azure.
+- Public templates/Preview award no learner progress. Approved live work still needs owner scope/budget/lifetime/bootstrap readiness; cleanup needs its own authorization.
+- Existing `repeatOnChange` paths and checkpoint timing remain unchanged. Historical jobs cannot prove a later revision; neither reading a lesson nor a green mock creates live completion.

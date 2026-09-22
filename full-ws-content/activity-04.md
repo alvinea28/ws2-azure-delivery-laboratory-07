@@ -6,79 +6,50 @@
 > **Review copy, not a second progress tracker.** The complete canonical lesson follows. Learners follow the live **Exercise issue in their own private copy**, opened from that copy's README; AgentAlvine updates the same issue body. The public source preview awards no learner progress. This live activity remains blocked until genuine instructor prerequisites are met.
 
 <!-- FULL-WS-LESSON:START -->
-# Lab 07 · Step 4 — Confirm a fresh no-change result
+# Lab 07 · Step 4 — Make one benign update and confirm no-change
 
-**Goal:** Confirm a separate fresh plan reports no changes for the revision actually deployed.
+**Goal:** Apply one tag-only update, inspect it, then confirm no-change.
 
-| Working context | Selection |
-| --- | --- |
-| Repository / branch | Same approved private writer / current protected `main` |
-| Read, do not edit | [environments/dev/main.tf](../environments/dev/main.tf), [environments/dev/outputs.tf](../environments/dev/outputs.tf), [module-lock.json](../module-lock.json) |
-| Workflow / operation | **Trusted dev delivery (instructor enablement required)** / `followup` |
-| Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0**; unchanged locks |
+Use the approved private writer after [Step 3](activity-03.md)'s deployment/inspection; retain every [Step 2 control](activity-02.md). Public/unapproved copies stay offline.
 
-> [!WARNING]
-> **Public templates remain inert.** Instructor authorization and all [Step 2 protections](activity-02.md) remain mandatory. No local real initialization/state access, disabled refresh/locks, broadened permissions or Copilot cloud tools. A missing prerequisite means **BLOCKED**, not no-change.
+### 1. Make the approved tag update
 
-## Do
+Agree an **owner-approved non-reserved tag** within the existing budget/lifetime. Create **lab/benign-update** from deployed current main; preserve existing work. In [environments/dev/main.tf](../environments/dev/main.tf), module `network`, replace only `tags = var.tags` with:
 
-### 1. Match the deployed revision
-
-Open the successful deployment run and **Code → main → latest commit** in this private writer. With the instructor, compare source SHA, module, inputs, state and scoped authorization. Do not change bindings during follow-up; changed code/settings need a reviewed decision and appropriate new deployment first.
-
-If you performed [Step 3's benign HCL update](activity-03.md), use that latest deployed SHA and verify its actual Azure tag/property change and unchanged IDs first. An earlier baseline no-change does not prove the update converged. Output IDs alone are not configuration evidence.
-
-Reconfirm [preflight](../docs/instructor-preflight.md): distinct workload identities, private backend and lease access, state-specific concurrency, restricted runner, main-only environments with no Required reviewers and no administrator bypass. No manual deployment reviewer is required; scope/budget/bootstrap authorization remains separate. **A baseline run proves only the baseline**; Lab 08 is not required to finish it.
-
-### 2. If returning from Lab 08, establish a new live cycle
-
-Skip this action for the baseline. Lab 08's offline result does not deploy its candidate. Optional capstone live follow-up requires:
-
-| Review together in this same writer | Required outcome |
-| --- | --- |
-| Module release | Genuine reviewed `v1.1.0`, resolved to its full commit—not a movable tag |
-| Consumer | Exact source pin, matching dependency lock/verified snapshot and caller outputs; no invented digests |
-| Inputs | Instructor-approved `app` ranges in `WORKLOAD_INPUTS_JSON`, not synthetic example CIDRs |
-| Deployment | Author-merged protected-main PR after strict checks/conversation resolution, then a new `deploy` with fresh encrypted plan and automatic exact-plan apply |
-
-The [course manifest](../.github/agentalvine/course.json) watches these paths through `repeatOnChange`:
-
-```json
-[
-	"module-lock.json",
-	"environments/dev/main.tf",
-	"environments/dev/outputs.tf",
-	"exercise/capstone-cycle.md"
-]
+```hcl
+tags = merge(var.tags, { workshop_iteration = "02" })
 ```
 
-**Why:** Changed watched content restarts a completed delivery cycle; previous jobs cannot prove the new revision. This is a read-only manifest excerpt, not a file to edit or manual evidence submission. Do not create a second state writer. The separate AVM **4.81** profile is not connected to this **5.4.0** live baseline.
+Preserve reserved `var.tags`, source pin, locks, names, CIDRs, subnet keys, rules, topology, backend and ownership. Lab07 has **no `locals.tags`**. If this tag is disallowed/already present, stop for a genuine owner-approved change; no empty commit or second baseline update.
 
-### 3. Request a separate followup
+### 2. Check and merge the real change
 
-Choose **Actions → Trusted dev delivery (instructor enablement required) → Run workflow → Branch: main → operation: followup**. Recheck the writer and current reviewed SHA, then submit. Open the **new run**, attempt **1**, never **Re-run jobs** on a deployment or earlier follow-up.
+At clone root:
 
-![GitHub reference highlighting the Actions tab](../docs/images/github-actions.webp)
+```powershell
+npm test
+npm run kit:check
+npm run workflow:check
+node scripts/check-learner.mjs
+```
 
-*REFERENCE — GitHub, CC BY 4.0; navigation, not your successful run. [Attribution](../docs/images/NOTICE.md).*
+**Source Control → inspect diff → Stage Changes → Commit → Publish Branch/Push**. Open a PR with **base: main**, **compare: lab/benign-update**; inspect changed files, wait for current checks, resolve conversations, then **Merge pull request → Confirm merge** as author within the authorized window.
 
-### 4. Inspect the real confirmation
+In its new **push / main** run, require validation, **Trusted dev plan → Apply exact dev saved plan**. Expect actual in-place updates: **creates 0, deletes 0, replacements 0**, with the same VNet/subnet/NSG resource IDs. Reopen the Azure portal resources → **Tags**: verify `workshop_iteration = "02"` and preserved required tags/topology.
 
-Require **Verify scoped dev deployment policy**, **Validate reviewed delivery revision**, **Trusted dev plan**, then **Confirm no-change** to succeed. Open **Changes must be explained, never reported as no-change** and inspect the actual detailed exit:
+![GitHub reference: inspect the PR diff](../docs/images/github-pr-files.webp)
 
-| Code | Interpretation |
-| --- | --- |
-| `0` | Fresh no-change for these deployed bindings; passes confirmation |
-| `2` | Differences remain; planning can succeed but follow-up fails |
-| `1` | Error; no usable no-change result |
+*REFERENCE — GitHub, CC BY 4.0; not your update evidence. [Attribution](../docs/images/NOTICE.md).*
 
-The plan remains an encrypted **AES-256-GCM / RSA-OAEP** envelope: maximum age **2 hours**, artifact retention **1 day**, no cross-run reuse. Followup applies nothing; future mutation still requires fresh scoped authorization, same-run validation/planning and exact-plan application. Never expose keys, tokens, state, decrypted plans or sensitive screenshots.
+### 3. Request followup, not another deployment
 
-**Expected / gate:** After the whole run completes, refresh your Exercise. AgentAlvine requires a successful same-repository main run at current observed SHA, attempt **1**, after course start/preceding checkpoint; **Trusted dev plan** and **Confirm no-change** must actually succeed. Skipped jobs, fixtures, earlier cycles and apply summaries cannot substitute. No manual progress or evidence protocol.
+**Actions → Trusted dev delivery (instructor enablement required) → Run workflow → main → operation: followup** only. Open the **new run**, **attempt 1**, at the latest deployed SHA; never rerun old jobs. Require fresh plan **exit 0** and **Confirm no-change**; exit **2 is not no-change**, **1** is an error. Followup never applies; scheduled drift is report-only.
 
-**Recovery:** Comment a sanitized **BLOCKED** reason. Distinguish drift from intended changes; obtain an authorized correction and fresh exact plan before mutation. For access, DNS, runner or lease failures, involve the owner—never grant Owner, expose storage, force-unlock an active writer or suppress refresh. Delivery's manual choice is followup only; ordinary main never cleans up. Dedicated cleanup uses the same state/concurrency/environments/identities after a separate current-admin decision.
+**Expected:** The actual completed current-SHA main run after course start/preceding checkpoint has **Trusted dev plan** and **Confirm no-change** successful in the same run. Old/skipped/fixture jobs do not count; no new score.
 
-**Next:** [Step 5: mandatory separately authorized cleanup](activity-05.md). No-change alone is not deletion authorization.
+**Recovery:** Stop on unexpected changes/access errors; ask the owner, never suppress refresh, unlock state or widen roles.
+
+**Next:** [Step 5 cleanup](activity-05.md). Optional later capstone work needs a fresh revision-bound cycle, not historical results.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08

@@ -8,79 +8,55 @@
 <!-- FULL-WS-LESSON:START -->
 # Lab 07 · Step 1 — Construct Actions and map identity/state offline
 
-**Goal:** Construct the single disabled delivery workflow and separate workload permissions from state-lease permissions, then hand off the tested YAML and identity map.
+**Goal:** Construct one complete Actions workflow and map identity/state offline.
 
-| Working context | Selection |
-| --- | --- |
-| Branch | Actual default, normally `dev` → `lab/workflow-authoring` |
-| Edit | [exercise/identity-map.md](../exercise/identity-map.md) and the existing [.github/workflows/delivery.yml](../.github/workflows/delivery.yml) |
-| Teaching source | [solutions/delivery.yml](../solutions/delivery.yml), complete and outside the runnable workflow directory |
-| Read only | [environments/dev/main.tf](../environments/dev/main.tf), [environments/dev/backend.tf](../environments/dev/backend.tf), [module-lock.json](../module-lock.json) |
-| Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0** |
+No earlier lab or Azure account is needed. Keep `WORKSHOP_AZURE_ENABLED=false`: no Azure login, live backend/state, or local apply/destroy.
 
-> [!WARNING]
-> **Public templates remain inert; keep `WORKSHOP_AZURE_ENABLED=false`.** No earlier lab or Azure account is needed. This step permits no Azure sign-in, identity creation, state access, real backend initialization, local apply/destroy, or Copilot cloud tools. The exact approved private route uses automatic exact-plan apply with no manual deployment reviewer; real scope/budget/bootstrap prerequisites remain separate.
+### 1. Prepare your own clone
 
-## Do
-
-### 1. Open your own copy once
-
-Already in your private copy's Exercise? **Do not copy again.** Otherwise [install tools and check accounts](../docs/start-here.md), then **COPY EXERCISE** from the [Lab 07 source](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07): intended Owner, unique `laboratory-07` suffix, **Private**, **Include all branches** off.
-
-Copy **your copy's Code → HTTPS URL**. In desktop VS Code: **Ctrl+Shift+P → Git: Clone**, paste it, authorize the correct account, choose a parent folder, then **Open** the clone. Trust only this repository; macOS uses **Cmd**.
-
-Check **Accounts → GitHub Copilot**/seat and local Git authorship separately from browser/Git sign-in. In **Terminal → New Terminal** at the clone root:
+1. Use [official installers](../docs/toolchain.md): Git, desktop VS Code, Node **24.16.0**, Terraform **1.16.1**, actionlint **1.7.12**; AzureRM **5.4.0** stays pinned. Create/verify your GitHub account, accept invitation/SSO; select **Accounts → GitHub/Copilot**, verify your seat and **Manage Extension Account Preferences**.
+2. **Reuse your existing private copy.** Otherwise open the [source](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) → **Use this template → Create a new repository**: intended **Owner**, unique `-laboratory-07` name, **Private**, **Include all branches** off.
+3. Your copy's **Code → HTTPS** → VS Code **Ctrl+Shift+P → Git: Clone** → paste URL → parent folder → **Open**. Trust only this clone; **Explorer** must show the lab root. macOS uses **Cmd**. [Set local authorship](../docs/start-here.md#set-authorship-only-for-this-repository); it is not authentication.
+4. From the actual default branch, normally `dev`, use **Git: Create Branch → lab/workflow-authoring**; reuse existing work, never reset it. At the clone root, **Terminal → New Terminal**:
 
 ```powershell
+node --version
+terraform version
 node scripts/doctor.mjs
 ```
 
-**Why:** `node` runs the [read-only doctor](../scripts/doctor.mjs): local tools/context, not account rights, seat or Azure readiness. Stop on failures.
+![VS Code reference: account selection](../docs/images/vscode-accounts.png)
 
-![Microsoft reference showing the Accounts menu's Copilot sign-in entry](../docs/images/vscode-accounts.png)
+*REFERENCE — Microsoft, CC BY 3.0 US; not account/seat proof. [Attribution](../docs/images/NOTICE.md).*
 
-*REFERENCE — Microsoft, CC BY 3.0 US; navigation example, not your account/seat. [Attribution](../docs/images/NOTICE.md).*
+### 2. Complete the identity map
 
-### 2. Branch and write the map
-
-With a clean working tree, select the actual default branch and **Source Control → … → Pull**. Use **Ctrl+Shift+P → Git: Create Branch… → lab/workflow-authoring**. Preserve any existing learner work; ask for synchronization help instead of resetting it. Open the identity map with **Ctrl+P**; replace its `TODO` text with:
+Edit [exercise/identity-map.md](../exercise/identity-map.md); remove `TODO`, not existing work. No secrets or real IDs:
 
 ```markdown
 # Identity and state map
-- AZURE_PLAN_CLIENT_ID is the distinct plan identity: Reader at the assigned workload RG.
-- AZURE_APPLY_CLIENT_ID is the apply identity: Contributor at that same existing RG.
-- Both identities need Storage Blob Data Contributor at the assigned state container.
-- STATE_CONTAINER identifies the permitted container; STATE_KEY selects this dev state blob.
-- A blob lease requires state data writes even when workload access is Reader.
-- Keep locking enabled. A key name alone is not an RBAC isolation boundary.
-- The instructor designates one writer repository for this state; another copy is not a writer.
-Live readiness is pending instructor verification; this map enables nothing.
+- AZURE_PLAN_CLIENT_ID: distinct Reader identity at the assigned workload RG.
+- AZURE_APPLY_CLIENT_ID: distinct Contributor identity at that same RG.
+- Both need Storage Blob Data Contributor at the assigned state container for a lease.
+- STATE_CONTAINER selects the container; STATE_KEY selects this dev state blob.
+- Keep locking and one writer; a key name alone is not RBAC isolation.
+This map verifies no live readiness or authorization.
 ```
 
-**Why:** Workload Reader does not supply the state data writes needed for a blob lease. Map roles, not real IDs or credentials. Instructor-owned settings and exact-subject federation are detailed in [delivery configuration](../docs/delivery-configuration.md).
+### 3. Construct Actions here
 
-### 3. Construct the canonical workflow — required, not optional reading
+Open [solutions/delivery.yml](../solutions/delivery.yml), the non-runnable reference. **File → New Text File → YAML**; keep this buffer **untitled**. Copy the complete header (`name`, `on`, `permissions`, `concurrency`, `env`) through `jobs:`, then in order:
 
-Follow [the complete workflow-authoring tutorial](../docs/workflow-authoring.md). The installed workflow is already complete: use the separate teaching reference to construct its sections in an untitled YAML buffer, then save the complete result into **the same canonical file**. Keep `WORKSHOP_AZURE_ENABLED=false`, all guards, exact action/tool pins and the existing helpers. Never install another main deployment file or commit a partial workflow.
+1. Copy the complete `preflight` job, stopping before `validation`.
+2. Copy the complete `validation` job, stopping before `plan`.
+3. Copy the complete `plan` job, stopping before `apply`.
+4. Copy the complete `apply` job, stopping before `followup`.
+5. Copy the complete `followup` job, stopping before `drift`.
+6. Copy the complete `drift` job through EOF.
 
-**Hands-on phase checklist:** in VS Code **File → New Text File → YAML**, construct and explain each complete reference section in order:
+Preserve indentation, action/tool pins, driver calls, guards, conditions, permissions and expressions. Compare the whole buffer; still disabled, replace the existing [.github/workflows/delivery.yml](../.github/workflows/delivery.yml) in **one complete save**. Keep [cleanup.yml](../.github/workflows/cleanup.yml) separate and unchanged. No extra or partial workflow. Exact reconstruction with **no Git diff** is valid; no fake change or empty commit.
 
-| Section to create | Expected behavior |
-| --- | --- |
-| Header through `jobs:` | Main-push trigger, followup-only dispatch, report-only schedule; no inherited secrets or broad permissions |
-| `preflight` | Exact approved private identity, protected current main, rules, merged PR, attempt and environment checks |
-| `validation` | Hosted credential-free checks at the same SHA before privileged planning |
-| `plan` | Separate OIDC identity, locked owned state, exact saved plan and encrypted artifact |
-| `apply` | Automatic same-run exact-plan apply; no approvals API, reviewer wait or second deploy button |
-| `followup` / `drift` | Fresh exit-0 confirmation or report-only drift; neither applies nor cleans up |
-
-Compare the whole buffer, then replace only the canonical workflow **in one save**. Leave the dedicated cleanup workflow and non-runnable solutions unchanged. Missing sections or mismatched pins mean stop and compare, never relax the checker.
-
-Explain the hosted `preflight` → same-SHA `validation` → trusted `plan` dependency in your map. Also explain main push → saved plan/encryption → automatic **same-run apply**, without another deploy dispatch or reviewer wait. Delivery dispatch is **followup only**; [cleanup.yml](../.github/workflows/cleanup.yml) is separately owner-authorized with required string `authorization`, no operation input. Exact reconstruction may leave no YAML diff; do not manufacture one.
-
-### 4. Check the constructed workflow and isolated baseline
-
-From the clone root:
+### 4. Run offline checks and publish
 
 ```powershell
 npm test
@@ -89,27 +65,15 @@ npm run workflow:check
 node scripts/check-learner.mjs
 ```
 
-**Why:** Node tests exercise both accepted and rejected control configurations; the kit checks the guide; the workflow checker requires pinned references, one canonical delivery workflow, one separately authorized cleanup workflow and three credential-free/guide companions. Each command must pass. None enables Azure or completes a live gate.
+Require all checks plus **two consumer mock cases**: backend-disabled, read-only provider locks, no Azure credentials. Downloads need internet. Preserve [module-lock.json](../module-lock.json).
 
-**Why:** The [helper](../scripts/check-learner.mjs) verifies source/lock/vendor hashes and runs **two consumer mock cases** in a disposable backend-disabled root with read-only provider lock. Require both cases and overall success; downloads need internet, not Azure.
+**Source Control → inspect diff → Stage Changes** for intended map/workflow edits only → **Commit → Publish Branch/Push**. In **Actions**, match current SHA: **Workshop quality / kit** and **Lab checks / Test learner module** must pass.
 
-The supplied [snapshot](../docs/dependency-snapshot.md) pins `4414e56b409a46785590741adcc48abea29905d7` under `//module`; no earlier release lab or repin needed. Baseline **5.4.0** and AVM **4.81** are separate, not interchangeable live profiles.
+**Expected:** The unchanged first gate checks the committed identity map only, not workflow authorship or Azure authorization; refresh the same Exercise.
 
-### 5. Publish the offline work and hand off
+**Recovery:** Stop on failures; [troubleshoot](../docs/troubleshooting.md), never weaken checks.
 
-| Where | Action |
-| --- | --- |
-| VS Code | **Ctrl+S**; inspect the workflow/map diffs; **+** stages only intended edits; review **Staged Changes** |
-| Source Control | Commit `lab: construct delivery workflow and map identity`; **Publish Branch** to existing `origin`, later **Push** |
-| GitHub | Compare newest branch SHA; inspect **Actions → Workshop quality** and **Lab checks**; refresh your existing **Exercise** body |
-
-No protected `main`/sandbox? Hand the pushed branch to the instructor; do not invent `main`, open a PR into a nonexistent branch or substitute `dev`. Consult [configuration status](../docs/delivery-configuration.md), not stale setup assumptions. Owner target, budget/currency, lifetime and explicit bootstrap authorization plus verified OIDC/state/runner/keys/module App are prerequisites; this activity verifies none of them. Keep false and default dev. The owner establishes protected main while disabled only after baseline/readiness review. Later, the author may merge their own PR after strict checks and resolved conversations, with zero required approving reviews. Once enabled, its main push automatically applies the exact saved plan. Public source maintenance stays on dev; never repin the allowlist for another copy.
-
-**Expected / gate:** The committed map contains all eight role/field terms shown above and no `TODO`; required workflow checks pass at the current SHA. The existing Step 1 gate still checks the map only, not authorship or deployment; this adds no new score. AgentAlvine advances only offline study; no manual checkbox, evidence PR or run-ID submission.
-
-**Recovery:** Missing files, provenance, tools or live controls mean **BLOCKED**; consult [troubleshooting](../docs/troubleshooting.md) and [instructor preflight](../docs/instructor-preflight.md). Never initialize the canonical backend or weaken gates.
-
-**Next:** [Step 2: live prerequisites and the main-push plan](activity-02.md). Without authorization, stop live work; independent Lab 08 remains available offline.
+**Next:** [Step 2](activity-02.md), only after owner readiness.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08

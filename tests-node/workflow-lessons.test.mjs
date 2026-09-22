@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { access, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join, posix } from "node:path";
@@ -18,7 +19,6 @@ test("AgentAlvine observes dedicated cleanup completion without acquiring deploy
   assert.ok(workflow.includes("ref: ${{ github.event.repository.default_branch }}"));
   assert.doesNotMatch(workflow, /id-token:|secrets\.|download-artifact|self-hosted/);
   const starter = await read("exercise/plan-review.md");
-  assert.match(starter, /TODO/);
   assert.match(starter, /automatic exact-plan apply/);
   assert.doesNotMatch(starter, /then approves the actual run/);
 });
@@ -55,6 +55,8 @@ function mirroredBody(text, kind) {
 
 test("workflow authoring preserves Step 1 and five steps while tracking the actual automatic apply and dedicated cleanup jobs", async () => {
   assert.equal(course.number, 7);
+  assert.equal(course.lessonPresentation, "concise");
+  assert.deepEqual(course.steps.map(({ checks }) => checks.length), [1, 1, 2, 1, 1]);
   assert.deepEqual(course.steps.map(({ id, requiresCommit }) => ({ id, requiresCommit })), [
     { id: "1", requiresCommit: true }, { id: "2", requiresCommit: false },
     { id: "3", requiresCommit: true }, { id: "4", requiresCommit: false }, { id: "5", requiresCommit: false },
@@ -88,6 +90,14 @@ test("workflow authoring preserves Step 1 and five steps while tracking the actu
   assert.deepEqual(course.repeatOnChange, ["module-lock.json", "environments/dev/main.tf", "environments/dev/outputs.tf", "exercise/capstone-cycle.md"]);
 });
 
+// The original dated outcomes are immutable, not rewritten as current success.
+const historicalTails = [
+  "06f18bb1fcd13c11d3dd065c65ab08ad91108cc9b87d2aa8573f5da16b0562da",
+  "f38f8e3707f02c147ab8eea22423c4a238d2104af338ce11502f70e8427bd8d0",
+  "dbdb5e7f1c159d1d341c2ce287759f14f3438891ec1913d171e30fe56b07199f",
+  "3b5c7400516edf7126b19bcdf6a51c5531f096b72b384deface7358b01560996",
+  "511a9a3738c0f5d8ce28d880e824819e7d79c63988f8d0e6da861d65bdaf42e6",
+];
 for (const step of course.steps) {
   test(`full-content activity ${step.id} exactly mirrors its installed lesson outside rebased links`, async () => {
     const number = step.id.padStart(2, "0");
@@ -95,10 +105,11 @@ for (const step of course.steps) {
     const mirror = await read(`full-ws-content/activity-${number}.md`);
     assert.ok(mirroredBody(mirror, "LESSON") === rebase(lesson, step.lesson).trim(), `Activity ${number} mirror drift; update only the current lesson body, not historical outcomes`);
     assert.ok(mirror.includes("## Original Cycle A/B outcome"), "Preserve the original outcome section");
+    assert.equal(createHash("sha256").update(mirror.split("<!-- FULL-WS-LESSON:END -->")[1]).digest("hex"), historicalTails[Number(step.id) - 1]);
   });
 }
 
-test("the full setup mirror preserves all canonical setup content including required authoring", async () => {
+test("the full setup mirror preserves canonical setup and the five-step route", async () => {
   const setup = await read("docs/start-here.md");
   const mirror = await read("full-ws-content/00-start-here.md");
   assert.ok(mirroredBody(mirror, "SETUP") === rebase(setup, "docs/start-here.md").trim(), "Setup mirror drift");
@@ -111,15 +122,11 @@ for (const name of ["azure-setup.md", "defender-posture-hands-on.md"]) {
   });
 }
 
-test("core authoring is linked from actual Step 1/2, landing, setup and instructor entry points", async () => {
-  for (const path of ["README.md", "docs/start-here.md", "docs/instructor-preflight.md", ".github/steps/01.md", ".github/steps/02.md", "full-ws-content/README.md"]) {
-    const text = await read(path);
-    assert.ok(text.includes("workflow-authoring.md"), `${path} must link the required task`);
-  }
+test("workflow construction is inside Step 1 rather than delegated to an additional required tutorial", async () => {
   const first = await read(".github/steps/01.md");
-  for (const token of ["lab/workflow-authoring", "WORKSHOP_AZURE_ENABLED=false", "npm run workflow:check", "solutions/delivery.yml", "already complete"]) assert.ok(first.includes(token), `Step 1 must explain ${token}`);
-  const guide = await read("docs/workflow-authoring.md");
-  for (const token of ["untitled", "same-run apply", "no second dispatch", "two explicit provider-mocked", "not a security boundary", "does **not** independently query Azure"]) assert.ok(guide.includes(token), `Core tutorial must explain ${token}`);
+  for (const token of ["lab/workflow-authoring", "WORKSHOP_AZURE_ENABLED=false", "npm run workflow:check", "solutions/delivery.yml", "File → New Text File → YAML", "one complete save"]) assert.ok(first.includes(token), `Step 1 must teach ${token}`);
+  assert.doesNotMatch(first, /workflow-authoring\.md/);
+  assert.match(await read("docs/workflow-authoring.md"), /\*\*Optional reference\.\*\*/);
 });
 
 test("updated authoring and operational guidance has resolvable local file links", async () => {
@@ -153,11 +160,9 @@ test("active operational lessons teach automatic saved-plan apply rather than a 
 test("cleanup lesson teaches one explicit current-admin authorization bound to the exact repo, current SHA and state", async () => {
   const lesson = await read(".github/steps/05.md");
   const text = prose(lesson);
-  for (const pattern of [/workflow_dispatch|explicit.*dispatch/i, /required string input authorization/i, /destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>/, /no operation input/i, /no independent cleanup reviewer/i, /current admin permission, matching actor\/sender\/trigger IDs/i, /same run/i, /2 hours/i, /1 day/i, /empty managed-state.*Azure inventory/i, /retained-owner confirmation/i, /not independent Azure verification or authorization/i]) assert.match(text, pattern);
-  assert.match(lesson, /gh workflow run cleanup\.yml --repo \$cleanupRepo --ref main --field "authorization=\$authorization"/);
-  assert.doesNotMatch(lesson, /--field operation=destroy/);
+  for (const pattern of [/current repository admin/i, /separate explicit full owned-workload cleanup decision/i, /Run workflow.*main/i, /required string authorization/i, /destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>/, /never submit placeholders/i, /no operation input/i, /no independent cleanup reviewer/i, /same run/i, /2 hours/i, /1 day/i, /empty managed-state.*Azure portal/i, /Empty state alone.*not Azure absence proof/i]) assert.match(text, pattern);
+  assert.doesNotMatch(lesson, /gh workflow run|--field operation=destroy|```powershell/);
   assert.match(lesson, /\.\.\/workflows\/cleanup\.yml/);
-  assert.match(lesson, /\.\.\/\.\.\/solutions\/cleanup\.yml/);
   const workflow = await read(".github/workflows/cleanup.yml");
   assert.match(workflow, /^name: Trusted dev cleanup \(explicit owner authorization required\)/);
   for (const name of ["Verify separate dev cleanup authorization", "Validate reviewed delivery revision", "Trusted dev plan", "Apply exact authorized dev destroy plan"]) assert.ok(text.includes(name), `Teach the actual job: ${name}`);
@@ -180,40 +185,41 @@ test("readiness stays context-specific with fail-closed ruleset bindings and no 
   }
 });
 
-const entryPoints = ["README.md", "docs/start-here.md", ".github/steps/01.md", ".github/steps/02.md", "full-ws-content/README.md"];
 const directGuides = ["README.md", ".github/agentalvine/README.md", ...["start-here", "workflow-authoring", "delivery-configuration", "pr-author-merge", "git-workflow", "instructor-preflight", "plan-review", "recovery", "identity-state", "azure-setup", "copilot-guide", "defender-posture-hands-on", "dependency-snapshot", "glossary", "troubleshooting"].map((name) => `docs/${name}.md`), ...course.steps.map((step) => step.lesson)];
-const activePart = (text) => text.split("## Complete activity sequence and original A/B status")[0].split("<!-- FULL-WS-LESSON:END -->")[0].split("<!-- FULL-WS-SETUP:END -->")[0];
+const activePart = (text) => text.replace(/<details\b[^>]*>[\s\S]*?<\/details>/gi, "").split("## Complete activity sequence and original A/B status")[0].split("<!-- FULL-WS-LESSON:END -->")[0].split("<!-- FULL-WS-SETUP:END -->")[0];
 
-test("hands-on construction is prominent in every entry point, not only a buried link or new score", async () => {
-  for (const path of entryPoints) {
-    const text = prose(activePart(await read(path)));
-    for (const pattern of [/hands-on/i, /VS Code/, /header/i, /preflight/, /validation/, /plan/, /apply/, /followup/, /drift/, /canonical/i, /false/, /current[- ]SHA/i, /workflow-authoring\.md/]) assert.match(text, pattern, path);
-    assert.doesNotMatch(text, /- \[ \]/, "Phase tables are instructions, not a manual progress protocol");
+function anchors(markdown) {
+  const values = new Set(), counts = new Map();
+  outsideCodeFences(markdown, (part) => {
+    for (const [, title] of part.matchAll(/^#{1,6} (.+)$/gm)) {
+      const slug = title.toLowerCase().replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/<[^>]+>/g, "")
+        .replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
+      const count = counts.get(slug) ?? 0;
+      values.add(count ? `${slug}-${count}` : slug);
+      counts.set(slug, count + 1);
+    }
+    return part;
+  });
+  return values;
+}
+
+test("current lesson and setup anchors resolve, including the optional reference's repaired inbound link", async () => {
+  const paths = ["README.md", ".github/agentalvine/README.md", "docs/start-here.md", "docs/workflow-authoring.md", "full-ws-content/README.md", "full-ws-content/00-start-here.md", ...course.steps.map(({ lesson }) => lesson), ...course.steps.map(({ id }) => `full-ws-content/activity-${id.padStart(2, "0")}.md`)];
+  for (const source of paths) {
+    const links = [];
+    outsideCodeFences(await read(source), (part) => { links.push(...part.matchAll(/\]\(([^)\s]+)\)/g)); return part; });
+    for (const [, href] of links) {
+      if (/^[a-z]+:/i.test(href)) continue;
+      const [path, fragment] = href.split("#");
+      if (!fragment) continue;
+      const target = path ? posix.normalize(posix.join(posix.dirname(source), decodeURIComponent(path))) : source;
+      if (!target.endsWith(".md")) continue;
+      assert.ok(anchors(await read(target)).has(decodeURIComponent(fragment)), `Broken anchor in ${source}: ${href}`);
+    }
   }
-  assert.match(course.description, /Required hands-on: construct the canonical GitHub Actions workflow/);
-  assert.equal(course.steps.length, 5);
-});
-
-test("the existing tutorial teaches atomic section-by-section reconstruction without control edits", async () => {
-  const text = prose(await read("docs/workflow-authoring.md"));
-  for (const pattern of [/untitled editor buffer/i, /one save/i, /no Git diff/i, /do not invent a YAML change/i, /solutions\/delivery\.yml/, /solutions\/cleanup\.yml/, /From name: through the line jobs:/, /Entire preflight:/, /Entire validation:/, /Entire plan:/, /Entire apply: job, stopping before followup:/, /Entire followup: job, then drift:/, /same-SHA/i, /no second dispatch/i, /no manual deployment reviewer/i, /not a security boundary/i, /no operation input/i]) assert.match(text, pattern);
-  for (const command of ["npm test", "npm run kit:check", "npm run workflow:check", "node scripts/check-learner.mjs", "actionlint -config-file"]) assert.ok(text.includes(command));
-  assert.doesNotMatch(text, /repin (?:the )?(?:IDs|repository IDs) to enable|change the allowlist to enable/i);
-});
-
-test("the live activity requires real properties and a benign HCL update before fresh followup and cleanup", async () => {
   const guide = await read("docs/workflow-authoring.md");
-  const text = prose(guide);
-  for (const pattern of [/Live-only, after Step 3's actual deployment/i, /not a sixth checkpoint/i, /Azure portal.*Resource groups.*VNet \/ NSG/i, /named subnet prefix/i, /subnet-to-NSG association/i, /direction\/access\/priority\/protocol\/ports\/source\/destination/i, /lab\/benign-update/, /same budget\/lifetime/i, /creates 0, deletes 0, replacements 0/i, /same resource IDs/i, /actual property observations/i, /fresh followup/i, /exit 0/i, /empty managed state.*actual Azure workload absence.*retained-owner confirmation/i, /does not independently verify these property checks/i]) assert.match(text, pattern);
-  assert.ok(guide.includes('tags = merge(var.tags, { workshop_iteration = "02" })'));
-  assert.match(text, /source pin, locks, resource names, CIDRs, rules, backend and ownership/i);
-  assert.match(prose(await read(".github/steps/03.md")), /Hands-on verification before followup.*no replacement.*same resource IDs/i);
-  assert.match(prose(await read(".github/steps/04.md")), /latest deployed SHA.*unchanged IDs.*earlier baseline no-change does not prove/i);
-});
-
-test("settings inspection requires owner scope and bootstrap readiness without secret values or cost guesses", async () => {
-  const text = prose(await read("docs/workflow-authoring.md"));
-  for (const pattern of [/Settings.*Rules.*Rulesets/i, /Environments.*dev-plan \/ dev-apply/i, /Secrets and variables.*Actions.*Variables/i, /secret names only/i, /Runner groups.*Workflow access/i, /Do not create environments, keys, identities or main during this inspection/i, /bootstrap changes need their own explicit authorization/i, /Budget must specify currency and lifetime/i, /never assume zero cost/i, /OIDC, state\/leases, runner, encryption keys and module App/i]) assert.match(text, pattern);
+  assert.ok(guide.includes("../.github/steps/03.md#3-observe-this-later-exact-plan-run"));
+  assert.doesNotMatch(guide, /03\.md#4-observe-scoped-authorization-and-exact-plan-application/);
 });
 
 test("active guidance rejects stale reviewer blockers and public copies of private progress or observations", async () => {

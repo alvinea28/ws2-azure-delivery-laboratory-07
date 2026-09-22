@@ -15,7 +15,8 @@
     "D2.7 live deployment, follow-up and cleanup"
   ],
   "duration": "45–60 minutes offline; live timing depends on instructor readiness",
-  "description": "Required hands-on: construct the canonical GitHub Actions workflow in VS Code and map identity/state with credential-free checks. No earlier laboratory or Azure account is needed offline. Only the exact approved private copy can use protected-main automatic exact-plan apply after owner scope, budget, lifetime, bootstrap and real readiness checks; no manual deployment reviewer. Public templates and unapproved copies cannot deploy.",
+  "lessonPresentation": "concise",
+  "description": "Follow five existing steps: construct GitHub Actions and map identity offline; merge the authorized PR; write the note and inspect Azure; make one tag update and confirm no-change; obtain separate full-cleanup authorization. No earlier lab or Azure account is needed offline. Only the exact owner-ready private copy can deploy; public templates and unapproved copies remain disabled. AgentAlvine observes, never authorizes Azure.",
   "nextRepository": "alvinea28/ws2-operations-capstone-laboratory-08",
   "completion": "The educational observer found successful named plan, automatic exact-plan apply, fresh no-change and separately authorized cleanup jobs at the applicable revisions. It does not independently verify Azure configuration or resource absence, and progress is not Azure authorization. The preparation note alone cannot complete live steps; a baseline run is not proof of a later capstone revision. Return here after Lab 8 for newly reviewed capstone deployment, follow-up and dedicated owner-authorized cleanup in the same single-writer repository. Every laboratory is independent; the catalogue order is a learning recommendation, not a requirement to create or finish another repository.",
   "steps": [
@@ -46,7 +47,7 @@
     },
     {
       "id": "2",
-      "title": "Observe an actual trusted dev plan",
+      "title": "Merge the authoring PR and observe the first plan",
       "lesson": ".github/steps/02.md",
       "requiresCommit": false,
       "checks": [
@@ -61,7 +62,7 @@
     },
     {
       "id": "3",
-      "title": "Explain and observe automatic exact-plan deployment",
+      "title": "Explain exact-plan apply and inspect Azure",
       "lesson": ".github/steps/03.md",
       "requiresCommit": true,
       "checks": [
@@ -91,7 +92,7 @@
     },
     {
       "id": "4",
-      "title": "Confirm a fresh no-change result",
+      "title": "Make one benign update and confirm no-change",
       "lesson": ".github/steps/04.md",
       "requiresCommit": false,
       "checks": [
@@ -107,7 +108,7 @@
     },
     {
       "id": "5",
-      "title": "Observe separately authorized cleanup and retain shared resources",
+      "title": "Authorize full cleanup and verify Azure absence",
       "lesson": ".github/steps/05.md",
       "requiresCommit": false,
       "checks": [
