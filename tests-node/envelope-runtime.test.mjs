@@ -51,9 +51,13 @@ test("Terraform child environment excludes ambient credentials, alternate worksp
   for (const key of ["ARM_CLIENT_CERTIFICATE", "ARM_CLIENT_SECRET_FILE_PATH", "TF_DATA_DIR", "TF_CLI_ARGS_apply", "GITHUB_TOKEN", "MODULE_READ_TOKEN", "PLAN_DECRYPTION_PRIVATE_KEY", "LD_PRELOAD", "NODE_OPTIONS"]) assert.equal(env[key], undefined, key);
 });
 
-test("pre-apply main lookup rejects branch movement during init and refuses failed API checks", async () => {
-  const config = { repository: "offline/example", sha: "a".repeat(40) };
-  const response = (sha, protectedBranch = true) => async () => ({ ok: true, json: async () => ({ protected: protectedBranch, commit: { sha } }) });
+test("mocked pre-apply main lookup rejects branch movement during init and refuses failed API checks", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => { throw new Error("External HTTP is forbidden in this unit test"); });
+  const config = { repository: "alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07", sha: "a".repeat(40) };
+  const response = (sha, protectedBranch = true) => async (url) => {
+    assert.equal(url, `https://api.github.com/repos/${config.repository}/branches/main`);
+    return { ok: true, json: async () => ({ protected: protectedBranch, commit: { sha } }) };
+  };
   assert.equal(await currentMain(config, response(config.sha)), config.sha);
   await assert.rejects(currentMain(config, response("b".repeat(40))), /Main changed during initialization/);
   await assert.rejects(currentMain(config, response(config.sha, false)));

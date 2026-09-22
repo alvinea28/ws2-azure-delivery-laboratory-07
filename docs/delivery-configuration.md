@@ -2,10 +2,35 @@
 
 > [!WARNING]
 > **INSTRUCTOR ONLY; PRIVATE copy; public templates inert.**
-> `WORKSHOP_AZURE_ENABLED=false` pending [independent authorization](instructor-preflight.md#6-keep-the-enablement-decision-honest).
-> No authoring Azure/identity/state/subscription/live-configuration operations.
+> `WORKSHOP_AZURE_ENABLED=false` pending [owner scope/bootstrap authorization and real readiness](instructor-preflight.md#6-keep-the-enablement-decision-honest).
+> Authoring and PR validation remain credential-free. Bootstrap changes require
+> explicit owner authorization; missing readiness never permits enabling delivery.
 
 **Setup:** [start-here.md](start-here.md) · [azure-setup.md](azure-setup.md) · [troubleshooting.md](troubleshooting.md)
+
+**Exact scope:** private non-template **alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07**,
+immutable repository ID **1379149907**. Wrong IDs/names, public repositories and
+templates fail. Public source-template maintenance remains inert on dev.
+New private copies are offline-only; do not edit or repin the repository allowlist
+to enable another copy. A private badge or matching name is not authorization.
+
+## Setup status — public source
+
+This public guide describes **expected configuration, not observed private settings**.
+It contains no private environment IDs, settings-readback timestamps or live-run
+claims. Keep enablement false and the offline default dev. The authorized owner
+must supply and verify target subscription/RG, region/ranges, budget/currency,
+lifetime, explicit bootstrap authorization, OIDC, backend/leases, trusted runner,
+encryption keys and module App transport before any live work. Never invent them.
+No Azure readiness, deployment, configuration update or cleanup is claimed here.
+
+The read-only workflow token cannot see GitHub's ruleset bypass list. The helper
+binds the approved ruleset to an owner/admin-verified server-issued `updated_at`
+revision with **zero bypass actors**; fresh stored and effective rules are still
+checked. Missing/changed revision fails closed. A hidden list is not assumed empty;
+never grant ruleset-write permission or update a pin simply to pass. Any actual
+settings change needs a fresh owner/admin readback and reviewed revision binding,
+not a new repository allowlist entry. See [GitHub's response visibility contract](https://docs.github.com/en/rest/repos/rules#get-a-repository-ruleset).
 
 ## 1. Find repository settings, not account settings
 
@@ -18,9 +43,12 @@ No access → administrator.
 
 ## 2. Establish the private copy's default and protected main
 
-While disabled: **Code → branch selector → View all branches → New branch** creates
-missing `main` from reviewed baseline. **Settings → General → Default branch → main
-→ Update**; verify **Code**. Template maintenance: `dev`.
+Do not open a PR into nonexistent main or create it while unready. Only after
+reviewing the baseline and readiness does the authorized owner establish protected
+main **while delivery remains disabled**. The ruleset alone does not create it.
+GitHub schedules use the default branch, normally **dev** for offline work. Live
+drift needs a deliberate owner decision to make protected main the default **when
+ready**; there is no automatic default-branch change. Template maintenance stays on dev.
 
 **Settings → Rules → Rulesets**: use the Lab 07
 [author-merge ruleset](pr-author-merge.md) for `refs/heads/main`.
@@ -35,8 +63,8 @@ Committing its JSON is not installation; an authorized administrator must apply 
 PR checks: **no Azure/OIDC/App credentials/backend/state**, never live jobs.
 The author inspects workflows/scripts/provenance/security. No Code Owner PR
 approval is required by this lab's source rule; an inherited organizational rule
-must still be respected and cannot be silently removed. Independent deployment
-environment approval remains mandatory.
+must still be respected and cannot be silently removed. For this exact scoped path,
+there is **no manual deployment reviewer**, not an exemption from the remaining controls.
 
 Both required check workflows run the [workflow-authoring checker](../scripts/check-workflow.mjs).
 Require [construction of the one canonical delivery workflow](workflow-authoring.md)
@@ -48,7 +76,8 @@ a learner bypass. Markdown explanations are not part of those control fingerprin
 ## 3. Review changes into protected main
 
 [Git route](git-workflow.md) → **Pull requests → New pull request**: **base: main**,
-**compare: task branch**. Author: **Files changed** (pin/snapshot/provider
+**compare: task branch**, **only after that protected branch exists and the owner
+has authorized the intended ready scope**. Author: **Files changed** (pin/snapshot/provider
 lock/controls) + current **Checks**; resolve conversations and merge with the same
 account after the enforced checks pass. Deployment SHA must match protected merged-main PR,
 not bootstrap.
@@ -57,13 +86,14 @@ not bootstrap.
 
 *GitHub reference, CC BY 4.0; not approval. [Attribution](images/NOTICE.md).*
 
-**Enabled main push = deploy**, not plan-only. Author-merging the PR never replaces
-independent [saved-plan approval](plan-review.md). **Zero source-PR approvals does
-not permit self-approval of an Azure apply or destroy job.**
+**Enabled main push = automatic exact-plan deploy**, not plan-only. The author may
+merge their own passing PR; zero approving reviews is not fabricated self-approval.
+[Saved-plan integrity and scoped authorization](plan-review.md) remain mandatory.
 
 The **same run** performs hosted preflight and exact-SHA credential-free validation
-before privileged planning, then waits for independent `dev-apply` approval and
-applies that saved plan. No second deploy dispatch; only followup/destroy are manual.
+before privileged planning, saves/encrypts the plan, then automatically runs
+**Apply exact dev saved plan**. No reviewer wait or second deploy dispatch. Delivery
+dispatch offers **followup only**; [cleanup](../.github/workflows/cleanup.yml) is separate.
 Never count a disabled/template/branch-skipped run as live completion.
 
 ## 4. Create and protect both environments before any workflow use
@@ -73,11 +103,14 @@ Never count a disabled/template/branch-skipped run as live completion.
 | Do | Why | Expected |
 | --- | --- | --- |
 | Deployment branches and tags → Selected branches and tags → Add rule → **Branch: main** | Trusted code | One custom rule; no tags/wildcards/extras |
-| Required reviewers → independent human/team; **Prevent self-review** on; administrator bypass off → Save protection rules | Independent decisions | Both environments; reopen/verify |
+| Required reviewers → **none**; administrator bypass **off** → Save protection rules | Approved automatic path, not self-approval | Both environments; reopen/verify |
 
-Unrestricted/**Protected branches only** fails. Code checks both branch policies,
-but reviewer/self-review/bypass only for `dev-apply`; instructor separately verifies
-all three review settings for `dev-plan`.
+Unrestricted/**Protected branches only** fails. Code checks both environments for
+exact main-only policies, no Required reviewers and no admin bypass. The historical
+[approval.cjs](../scripts/approval.cjs) delegates to
+[deployment-authorization.cjs](../scripts/deployment-authorization.cjs): fresh exact
+private identity, live rules, current main/run/SHA/attempt, actual merged PR and
+same-run validation/plan checks. It does **not** use the approvals API.
 Missing features/APIs → **BLOCKED**.
 
 ## 5. Repository variables: the Variables tab, not Secrets
@@ -108,10 +141,11 @@ Custodian: trusted UI entry; verify names/scopes, never expose values.
 | Environment | Secret | Restriction |
 | --- | --- | --- |
 | `dev-plan`, `dev-apply` | `MODULE_APP_PRIVATE_KEY` | Same App; fresh short-lived read token |
-| `dev-apply` **only** | `PLAN_DECRYPTION_PRIVATE_KEY` | After independent approval; never planning |
+| `dev-apply` **only** | `PLAN_DECRYPTION_PRIVATE_KEY` | After scoped authorization; never planning |
 
 Private keys: never repository/inherited organization secrets, PRs/caches/Git/issues/
-terminal input/Copilot; separate approved human escrow for [review](plan-review.md#4-review-the-encrypted-artifact-on-an-approved-human-workstation).
+terminal input/Copilot; any owner inspection/recovery escrow follows the approved
+private process, not a deployment reviewer gate. See [saved-plan handling](plan-review.md).
 AES-256-GCM + RSA-OAEP/SHA-256; **2-hour validity / 1-day retention**—retention cannot extend validity.
 App transport required even for public source.
 
@@ -119,10 +153,11 @@ App transport required even for public source.
 
 **Organization → Settings → Actions → Runner groups → instructor group**:
 **Repository access → Selected repositories**: private writer only, public off.
-**Workflow access → Selected workflows**: substitute approved copy:
+**Workflow access → Selected workflows**: restrict to exactly these two paths:
 
 ```text
-APPROVED-OWNER/PRIVATE-COPY/.github/workflows/delivery.yml@refs/heads/main
+alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07/.github/workflows/delivery.yml@refs/heads/main
+alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07/.github/workflows/cleanup.yml@refs/heads/main
 ```
 
 **Why:** policy value, not command; exact workflow/protected `main` only.
@@ -135,6 +170,26 @@ APPROVED-OWNER/PRIVATE-COPY/.github/workflows/delivery.yml@refs/heads/main
 
 Missing selected-workflow access/gates → **BLOCKED**, [escalate](instructor-preflight.md), never broaden.
 Mandatory [full cleanup](recovery.md#8-close-only-what-was-actually-verified): retain shared RG/backend/identities/roles/runner.
+
+## 8. Separate explicit cleanup authorization
+
+The installed [cleanup.yml](../.github/workflows/cleanup.yml) has a matching
+[non-runnable reference](../solutions/cleanup.yml). It accepts **workflow_dispatch
+only**, with required **string** `authorization`, **no operation input**:
+`destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`.
+
+An authenticated **current repository admin** explicitly authorizes owned-scope
+full cleanup and dispatches it on main. The helper checks current admin permission,
+matching actor/sender/trigger IDs, current SHA/state and successful same-run validation
+and exact destroy planning. **Apply exact authorized dev destroy plan** consumes
+those saved bytes; no independent cleanup reviewer is required. Use the same
+state, concurrency, environments and OIDC identities. Main pushes never clean up;
+destroy/replacements on regular pushes fail. No shared RG/backend/identity/runner removal.
+
+Scope, region, budget, lifetime and explicit bootstrap authorization must be real
+before enablement; cleanup authorization is a separate owner decision. Instructions,
+local tests and AgentAlvine's educational progress are not Azure authorization.
+Follow [Step 5](../.github/steps/05.md) only after readiness and authorization, not now.
 
 ## Source attribution and next checks
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, access } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
 
@@ -41,19 +41,34 @@ test("PR policy rejects wider refs, bypass actors, missing checks and accidental
   ]) { const changed = structuredClone(ruleset); mutate(changed); assert.throws(() => validate(changed)); }
 });
 
-test("zero PR approvals cannot replace independent apply/cleanup environment approval", () => {
-  const environment = { deployment_branch_policy: { protected_branches: false, custom_branch_policies: true }, can_admins_bypass: false, protection_rules: [{ type: "required_reviewers", reviewers: [{}], prevent_self_review: true }] };
+test("automatic deployment environments require main-only access, no reviewers and no bypass", () => {
+  const environment = { deployment_branch_policy: { protected_branches: false, custom_branch_policies: true }, can_admins_bypass: false, protection_rules: [] };
   const branches = [{ name: "main", type: "branch" }];
-  assert.doesNotThrow(() => assertEnvironmentProtection(environment, branches, true));
+  assert.doesNotThrow(() => assertEnvironmentProtection(environment, branches));
   for (const change of [
-    { protection_rules: [] }, { can_admins_bypass: true },
+    { protection_rules: undefined }, { can_admins_bypass: true },
+    { deployment_branch_policy: { protected_branches: true, custom_branch_policies: false } },
+    { deployment_branch_policy: null },
+    { protection_rules: [{ type: "required_reviewers", reviewers: [{}], prevent_self_review: true }] },
     { protection_rules: [{ type: "required_reviewers", reviewers: [{}], prevent_self_review: false }] },
-  ]) assert.throws(() => assertEnvironmentProtection({ ...environment, ...change }, branches, true));
+  ]) assert.throws(() => assertEnvironmentProtection({ ...environment, ...change }, branches));
+  for (const changed of [[], [{ name: "dev", type: "branch" }], [{ name: "main", type: "tag" }], [...branches, { name: "*", type: "branch" }]]) {
+    assert.throws(() => assertEnvironmentProtection(environment, changed));
+  }
 });
 
-test("PR guide distinguishes source merge from live approval and has valid standalone links", async () => {
+test("PR guide explains automatic exact-plan apply and separate cleanup with standalone links", async () => {
   const doc = await read("docs/pr-author-merge.md");
-  for (const token of ["zero required PR approvals", "not a fabricated self-approval", "This is not a solo Azure deployment route", "does **not** install it", "independent"]) assert.ok(doc.includes(token), `Missing distinction: ${token}`);
+  for (const token of ["zero required PR approvals", "not a fabricated self-approval", "No manual deployment reviewer is required", "does **not** install it", "deployment-authorization.cjs", "2-hour plan validity", "1-day artifact retention"]) assert.ok(doc.includes(token), `Missing distinction: ${token}`);
+  const prose = doc.replace(/[*`]/g, "").replace(/\s+/g, " ");
+  const id = course.number === 2 ? "1379147533" : "1379149907";
+  const suffix = course.number === 2 ? "network-module-laboratory-02" : "azure-delivery-laboratory-07";
+  const cleanup = course.number === 2 ? "avm-cleanup.yml" : "cleanup.yml";
+  assert.ok(prose.includes(`alvine-aurelio-org/ws2-sim-20260921-${suffix}`));
+  assert.ok(prose.includes(`destroy:${id}:<current full main SHA>:<WS2_STATE_LOCK_ID>`));
+  assert.ok(doc.includes(`../.github/workflows/${cleanup}`));
+  for (const pattern of [/no Required reviewers/i, /no admin bypass/i, /same run/i, /no operation input/i, /no independent cleanup reviewer/i, /actor\/sender\/trigger IDs/i, /same run's exact destroy plan/i, /followup only/i, /ordinary main never cleans up/i, /wrong IDs\/public\/templates fail/i, /AgentAlvine only observes\/guides, never authorizes Azure/i]) assert.match(prose, pattern);
+  assert.doesNotMatch(prose, /wait for.*independent.*reviewer|This is not a solo Azure deployment route/i);
   for (const file of ["README.md", "docs/delivery-configuration.md", "docs/git-workflow.md"]) assert.ok((await read(file)).includes("pr-author-merge.md"));
   for (const [, href] of doc.matchAll(/\]\(([^)\s]+)\)/g)) {
     if (/^(?:[a-z]+:|#)/i.test(href)) continue;
@@ -61,4 +76,30 @@ test("PR guide distinguishes source merge from live approval and has valid stand
     assert.ok(target.startsWith(resolve(root) + "/") || target.startsWith(resolve(root) + "\\"));
     await access(target);
   }
+});
+
+test("PR instructions stop at absent main and missing authorized prerequisites, not fabricated readiness", async () => {
+  const doc = await read("docs/pr-author-merge.md");
+  const text = doc.replace(/[*`]/g, "").replace(/\s+/g, " ");
+  for (const pattern of [/If protected main does not exist.*stop at the offline handoff/i, /Do not create main or open a PR into a nonexistent branch/i, /only after baseline\/readiness review, while delivery is disabled/i, /no new settings or Azure observation/i, /budget\/currency, lifetime and explicit bootstrap authorization/i, /OIDC, state\/leases, runner, encryption keys and module App must be verified/i, /Public source-template maintenance remains on dev, never live main/i, /do not edit or repin the immutable repository allowlist/i, /No live success is claimed/i]) assert.match(text, pattern);
+  assert.ok(doc.includes("delivery-configuration.md"), "Readiness belongs to the context-specific configuration record");
+  assert.doesNotMatch(text, /Last supplied (?:live )?readback|no main, environments, runners, secrets/i);
+  assert.match(text, /reuses the existing pinned ruleset 23780383/);
+  assert.match(text, /Do not create or import a replacement ruleset/);
+  assert.match(text, /missing or changed, keep delivery disabled.*owner to reconcile/i);
+  assert.doesNotMatch(text, /Rulesets → New branch ruleset/);
+});
+
+test("public source setup and existing private observations cannot be conflated into PR permission", async () => {
+  const config = (await read("docs/delivery-configuration.md")).replace(/[*`]/g, "").replace(/\s+/g, " ");
+  if (config.includes("Setup status — public source")) {
+    assert.match(config, /expected configuration, not observed private settings/i);
+    assert.doesNotMatch(config, /Verified configuration update, \d{2}:\d{2} UTC|dev-plan \(\d{10,}\)|dev-apply \(\d{10,}\)/i);
+  } else {
+    assert.match(config, /Setup status — existing private observations/);
+    assert.match(config, /not a new readback from this lesson edit/i);
+    assert.match(config, /later environment update supersedes only the initial absence of environments/i);
+  }
+  assert.match(config, /Missing\/changed revision fails closed/i);
+  assert.match(config, /zero bypass actors/i);
 });

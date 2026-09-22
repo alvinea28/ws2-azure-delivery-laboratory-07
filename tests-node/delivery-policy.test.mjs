@@ -3,8 +3,6 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
-import { fileURLToPath } from "node:url";
-import approval from "../scripts/approval.cjs";
 import { configuration } from "../scripts/delivery.mjs";
 import {
   MAX_PLAN_AGE_MS, PROVIDER_VERSION, TERRAFORM_VERSION, assertEnvironmentProtection,
@@ -14,8 +12,11 @@ import { bytesHash, moduleFiles, moduleSource, textHash, validateLock, verifySna
 
 // This suite exercises pure policy exports, injected GitHub responses and files
 // under mkdtemp only. It never calls deliver(), Terraform, Azure, git or a network
-// client. Synthetic IDs, hashes, approvals and plan bytes are not cloud evidence.
-const ROOT = fileURLToPath(new URL("../", import.meta.url));
+// client. The approved repository allowlist is modelled locally; synthetic runs,
+// hashes and plan bytes are never live GitHub or cloud evidence.
+const REPOSITORY = "alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07";
+const WORKFLOW_REF = `${REPOSITORY}/.github/workflows/delivery.yml@refs/heads/main`;
+const CLEANUP_REF = `${REPOSITORY}/.github/workflows/cleanup.yml@refs/heads/main`;
 const NOW = Date.parse("2026-09-07T12:00:00.000Z");
 const SHA = "a".repeat(40);
 const OTHER_SHA = "b".repeat(40);
@@ -58,11 +59,12 @@ const INPUTS_TEXT = jsonBytes(inputs()).toString("utf8");
 
 function config(patch = {}) {
   return {
-    repository: "offline-fixtures/network-environment", sha: SHA, runId: "901", runAttempt: "1",
+    repository: REPOSITORY, repositoryId: "1379149907", workflowRef: patch.operation === "destroy" ? CLEANUP_REF : WORKFLOW_REF,
+    sha: SHA, runId: "901", runAttempt: "1",
     root: "environments/dev", environment: "dev", operation: "deploy",
     subscription: SUBSCRIPTION, tenant: "22222222-2222-4222-8222-222222222222",
     planClientId: "33333333-3333-4333-8333-333333333333", applyClientId: "44444444-4444-4444-8444-444444444444",
-    resourceGroup: "rg-ws2-unit", stateAccount: "ws2unitstate", stateContainer: "team-unit", stateKey: "dev/network.tfstate",
+    resourceGroup: "rg-ws2-unit", stateAccount: "ws2unitstate", stateContainer: "team-unit", stateKey: "dev/network.tfstate", stateLockId: "unit-dev",
     ...patch,
   };
 }
@@ -70,12 +72,13 @@ function config(patch = {}) {
 function environmentVariables(patch = {}) {
   const c = config();
   return {
-    WORKSHOP_AZURE_ENABLED: "true", GITHUB_REF: "refs/heads/main", GITHUB_REF_PROTECTED: "true", REPOSITORY_PRIVATE: "true",
-    GITHUB_EVENT_NAME: "workflow_dispatch", ARM_USE_OIDC: "true", ARM_USE_AZUREAD: "true", ARM_USE_CLI: "false",
+    WORKSHOP_AZURE_ENABLED: "true", GITHUB_REF: "refs/heads/main", GITHUB_REF_PROTECTED: "true", REPOSITORY_PRIVATE: "true", REPOSITORY_TEMPLATE: "false",
+    GITHUB_EVENT_NAME: "push", ARM_USE_OIDC: "true", ARM_USE_AZUREAD: "true", ARM_USE_CLI: "false",
     GITHUB_REPOSITORY: c.repository, GITHUB_SHA: c.sha, GITHUB_RUN_ID: c.runId, GITHUB_RUN_ATTEMPT: c.runAttempt,
+    GITHUB_REPOSITORY_ID: c.repositoryId, GITHUB_WORKFLOW_REF: c.workflowRef,
     OPERATION: c.operation, ARM_SUBSCRIPTION_ID: c.subscription, ARM_TENANT_ID: c.tenant,
     PLAN_CLIENT_ID: c.planClientId, APPLY_CLIENT_ID: c.applyClientId, WORKLOAD_RG: c.resourceGroup,
-    STATE_STORAGE_ACCOUNT: c.stateAccount, STATE_CONTAINER: c.stateContainer, STATE_KEY: c.stateKey,
+    STATE_STORAGE_ACCOUNT: c.stateAccount, STATE_CONTAINER: c.stateContainer, STATE_KEY: c.stateKey, WS2_STATE_LOCK_ID: c.stateLockId,
     WORKLOAD_INPUTS_JSON: JSON.stringify(inputs()), ...patch,
   };
 }
@@ -124,80 +127,10 @@ function protection() {
   return {
     name: "dev-apply", can_admins_bypass: false,
     deployment_branch_policy: { protected_branches: false, custom_branch_policies: true },
-    protection_rules: [{ id: 1, type: "required_reviewers", prevent_self_review: true, reviewers: [{ type: "User", reviewer: { id: 12, login: "independent-reviewer", type: "User" } }] }],
+    protection_rules: [],
   };
 }
 const mainBranches = () => [{ id: 1, name: "main", type: "branch" }];
-
-function approvalFixture() {
-  const context = { repo: { owner: "offline-fixtures", repo: "network-environment" }, sha: SHA, runId: 901, actor: "operator" };
-  const model = {
-    branch: { name: "main", protected: true, commit: { sha: SHA } },
-    run: { id: 901, run_attempt: 1, head_sha: SHA, head_branch: "main", event: "workflow_dispatch", actor: { login: "author", type: "User" }, triggering_actor: { login: "rerunner", type: "User" } },
-    reviews: [{ state: "approved", user: { id: 12, login: "independent-reviewer", type: "User" }, environments: [{ id: 1, name: "dev-apply" }], comment: "Synthetic approval metadata only" }],
-    sourcePRs: [{ merged_at: "2026-09-07T08:00:00Z", merge_commit_sha: SHA, base: { ref: "main" }, user: { id: 11, login: "code-author" } }],
-    environment: protection(), branches: mainBranches(), errors: new Map(),
-  };
-  const calls = [];
-  const endpoint = (name, handler) => async (args) => {
-    calls.push({ name, args: clone(args) });
-    assert.equal(args.owner, context.repo.owner);
-    assert.equal(args.repo, context.repo.repo);
-    if (model.errors.has(name)) throw model.errors.get(name);
-    return { data: clone(handler(args)) };
-  };
-  const rest = {
-    repos: {
-      getBranch: endpoint("getBranch", ({ branch }) => { assert.equal(branch, "main"); return model.branch; }),
-      listPullRequestsAssociatedWithCommit: endpoint("listSourcePRs", ({ commit_sha }) => { assert.equal(commit_sha, SHA); return model.sourcePRs; }),
-      getEnvironment: endpoint("getEnvironment", ({ environment_name }) => { assert.equal(environment_name, "dev-apply"); return model.environment; }),
-      listDeploymentBranchPolicies: endpoint("listDeploymentBranchPolicies", ({ environment_name }) => {
-        assert.equal(environment_name, "dev-apply");
-        return { total_count: model.branches.length, branch_policies: model.branches };
-      }),
-    },
-    actions: { getWorkflowRun: endpoint("getWorkflowRun", ({ run_id }) => { assert.equal(run_id, 901); return model.run; }) },
-  };
-  const listApprovals = endpoint("listApprovals", ({ run_id }) => { assert.equal(run_id, 901); return model.reviews; });
-  const github = {
-    rest,
-    paginate: async (route, args) => {
-      assert.equal(args.per_page, 100);
-      if (typeof route === "string") {
-        assert.equal(route, "GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals");
-        return (await listApprovals(args)).data;
-      }
-      if (route === rest.repos.listPullRequestsAssociatedWithCommit) return (await route(args)).data;
-      assert.equal(route, rest.repos.listDeploymentBranchPolicies);
-      return (await route(args)).data.branch_policies;
-    },
-  };
-  const outputs = [];
-  const summaryText = [];
-  let writes = 0;
-  const summary = {
-    addHeading: (text) => { summaryText.push(text); return summary; },
-    addRaw: (text) => { summaryText.push(text); return summary; },
-    write: async () => { writes += 1; },
-  };
-  return { github, context, model, calls, outputs, summaryText, writes: () => writes, core: { setOutput: (...args) => outputs.push(args), summary } };
-}
-
-async function runApproval(f) {
-  // approval.cjs resolves its policy import from cwd. These tests run serially
-  // in this file; restore cwd even when an assertion/API failure rejects.
-  const previous = process.cwd();
-  const previousAttempt = process.env.GITHUB_RUN_ATTEMPT;
-  try {
-    process.chdir(ROOT);
-    process.env.GITHUB_RUN_ATTEMPT = String(f.model.run.run_attempt);
-    await approval({ github: f.github, context: f.context, core: f.core });
-  } finally {
-    process.chdir(previous);
-    if (previousAttempt === undefined) delete process.env.GITHUB_RUN_ATTEMPT;
-    else process.env.GITHUB_RUN_ATTEMPT = previousAttempt;
-  }
-}
 
 async function snapshotFixture(t, crlf = false) {
   const directory = await mkdtemp(join(tmpdir(), "ws2-policy-test-"));
@@ -210,11 +143,15 @@ async function snapshotFixture(t, crlf = false) {
   return { directory, lock: moduleLock() };
 }
 
-test("operationFor maps push/schedule deterministically and rejects unsupported dispatch operations", () => {
-  assert.equal(operationFor("push", "destroy"), "deploy");
-  assert.equal(operationFor("schedule", "deploy"), "drift");
-  for (const value of ["plan", "deploy", "destroy", "drift", "followup"]) assert.equal(operationFor("workflow_dispatch", value), value);
-  for (const value of [undefined, null, "", "apply", "Deploy", "plan;destroy"]) assert.throws(() => operationFor("workflow_dispatch", value), rejected(/Unsupported operation/), String(value));
+test("operationFor binds delivery and cleanup to their exact protected-main paths and supported events", () => {
+  assert.equal(operationFor("push", "destroy", WORKFLOW_REF), "deploy");
+  assert.equal(operationFor("schedule", "deploy", WORKFLOW_REF), "drift");
+  assert.equal(operationFor("workflow_dispatch", "followup", WORKFLOW_REF), "followup");
+  for (const input of [undefined, "destroy"]) assert.equal(operationFor("workflow_dispatch", input, CLEANUP_REF), "destroy");
+  for (const value of [undefined, null, "", "plan", "deploy", "destroy", "drift", "apply", "Deploy", "plan;destroy"]) assert.throws(() => operationFor("workflow_dispatch", value, WORKFLOW_REF), rejected(), String(value));
+  for (const event of ["pull_request", "pull_request_target", "workflow_run", "repository_dispatch"]) assert.throws(() => operationFor(event, "deploy", WORKFLOW_REF), rejected());
+  for (const event of ["push", "schedule"]) assert.throws(() => operationFor(event, "destroy", CLEANUP_REF), rejected());
+  for (const ref of [undefined, WORKFLOW_REF.replace("main", "dev"), WORKFLOW_REF.replace("delivery.yml", "avm-delivery.yml"), "other/repo/.github/workflows/delivery.yml@refs/heads/main"]) assert.throws(() => operationFor("push", "deploy", ref), rejected());
 });
 
 test("planExit recognizes exit 0/2 but rejects error 1, signals and unexpected statuses before manifest creation", () => {
@@ -235,7 +172,7 @@ test("planBinding pins toolchain and normalized lock/input digests without mutat
   assert.deepEqual(binding, { ...c, terraform: "1.16.1", provider: "5.4.0", providerLock: textHash(PROVIDER_LOCK), moduleLock: textHash(MODULE_LOCK_TEXT), inputs: textHash(INPUTS_TEXT) });
   assert.deepEqual(c, before);
   assert.deepEqual(planBinding(c, PROVIDER_LOCK.replaceAll("\n", "\r\n"), MODULE_LOCK_TEXT.replaceAll("\n", "\r\n"), INPUTS_TEXT.replaceAll("\n", "\r\n")), binding);
-  for (const patch of [{ sha: "main" }, { repository: "missing-owner" }, { subscription: "not-a-subscription-id" }, { operation: "apply" }, { root: "../dev" }, { environment: "prod" }, ...["runId", "runAttempt", "stateAccount", "stateContainer", "stateKey", "tenant", "planClientId", "applyClientId", "resourceGroup"].map((field) => ({ [field]: "" }))]) {
+  for (const patch of [{ sha: "main" }, { repository: "missing-owner" }, { subscription: "not-a-subscription-id" }, { operation: "apply" }, { root: "../dev" }, { environment: "prod" }, ...["repositoryId", "workflowRef", "runId", "runAttempt", "stateAccount", "stateContainer", "stateKey", "stateLockId", "tenant", "planClientId", "applyClientId", "resourceGroup"].map((field) => ({ [field]: "" }))]) {
     assert.throws(() => planBinding(config(patch), PROVIDER_LOCK, MODULE_LOCK_TEXT, INPUTS_TEXT), rejected(), JSON.stringify(patch));
   }
 });
@@ -292,6 +229,7 @@ test("verifyPlan must validate the manifest object against its authenticated byt
 test("verifyPlan rejects independent commit/run/attempt/repository/state/identity/root/toolchain binding mismatches", () => {
   const patches = {
     sha: OTHER_SHA, runId: "902", runAttempt: "3", repository: "other/environment", operation: "destroy",
+    repositoryId: "1379147533", workflowRef: CLEANUP_REF, stateLockId: "other-state",
     root: "environments/other", environment: "prod", stateAccount: "otherstate", stateContainer: "other-team", stateKey: "other/network.tfstate",
     subscription: OTHER_SUBSCRIPTION, tenant: "55555555-5555-4555-8555-555555555555", planClientId: "other-plan", applyClientId: "other-apply",
     resourceGroup: "rg-other", terraform: "1.16.0", provider: "5.3.0",
@@ -300,6 +238,10 @@ test("verifyPlan rejects independent commit/run/attempt/repository/state/identit
     const f = planFixture(); f.binding = { ...f.binding, [field]: value };
     if (field === "sha") f.currentSha = value;
     assert.throws(() => verifyPlan(f), rejected(/identity mismatch/), field);
+  }
+  for (const field of ["repositoryId", "workflowRef", "stateLockId"]) {
+    const f = planFixture(); delete f.manifest.binding[field]; sealManifest(f);
+    assert.throws(() => verifyPlan(f), rejected(/identity mismatch/), `old manifest without ${field}`);
   }
 });
 
@@ -348,14 +290,14 @@ test("verifyPlan forbids apply for plan-only, drift and follow-up operations eve
 test("summarizePlan counts only allowed workload resources and emits no raw values or outputs", () => {
   const changes = [
     resource("azurerm_virtual_network", ["create"]), resource("azurerm_subnet", ["update"]),
-    resource("azurerm_network_security_group", ["no-op"]), resource("azurerm_network_security_rule", ["delete"]),
-    resource("azurerm_subnet_network_security_group_association", ["delete", "create"]),
+    resource("azurerm_network_security_group", ["no-op"]), resource("azurerm_network_security_rule", ["create"]),
+    resource("azurerm_subnet_network_security_group_association", ["update"]),
   ];
   changes[0].change.after.description = "SYNTHETIC-SENSITIVE-VALUE";
   const data = { ...plan(changes), output_changes: { secret: { sensitive: true, after: "SYNTHETIC-OUTPUT" } } };
   assert.deepEqual(summarizePlan(data, config()), {
-    totals: { create: 1, update: 1, delete: 1, replace: 1, noChange: 1 },
-    resources: [0, 1, 3, 4].map((index, n) => ({ address: changes[index].address, action: ["create", "update", "delete", "replace"][n] })),
+    totals: { create: 2, update: 2, delete: 0, replace: 0, noChange: 1 },
+    resources: [0, 1, 3, 4].map((index, n) => ({ address: changes[index].address, action: ["create", "update", "create", "update"][n] })),
   });
   assert.doesNotMatch(JSON.stringify(summarizePlan(data, config())), /SYNTHETIC-|subscriptions|resource_group_name/);
   assert.deepEqual(summarizePlan(plan(), config()), { totals: { create: 0, update: 0, delete: 0, replace: 0, noChange: 0 }, resources: [] });
@@ -403,12 +345,22 @@ test("destroy summaries allow only scoped delete/no-op actions and reject create
   for (const actions of [["create"], ["update"], ["delete", "create"], ["create", "delete"]]) {
     assert.throws(() => summarizePlan(plan([resource("azurerm_virtual_network", actions)]), c), rejected(/Destroy plans may only delete/), actions.join(","));
   }
+  const all = ["azurerm_virtual_network", "azurerm_subnet", "azurerm_network_security_group", "azurerm_network_security_rule", "azurerm_subnet_network_security_group_association"].map((type) => resource(type, ["delete"]));
+  assert.deepEqual(summarizePlan(plan(all), c).totals, { create: 0, update: 0, delete: 5, replace: 0, noChange: 0 });
+});
+
+test("ordinary deploy, plan, drift and followup reject every deletion and replacement action ordering", () => {
+  for (const operation of ["deploy", "plan", "drift", "followup"]) {
+    for (const actions of [["delete"], ["delete", "create"], ["create", "delete"], ["no-op", "delete"], ["update", "delete"]]) {
+      assert.throws(() => summarizePlan(plan([resource("azurerm_virtual_network", actions)]), config({ operation })), rejected(/separately authorized cleanup/), `${operation}/${actions.join(",")}`);
+    }
+  }
 });
 
 test("configuration accepts explicit private protected-main OIDC settings without reading ambient environment or mutating inputs", () => {
-  for (const GITHUB_EVENT_NAME of ["push", "workflow_dispatch", "schedule"]) {
-    const env = environmentVariables({ GITHUB_EVENT_NAME }); const before = clone(env);
-    assert.deepEqual(configuration(env), { config: config(), inputsText: INPUTS_TEXT });
+  for (const [GITHUB_EVENT_NAME, OPERATION, GITHUB_WORKFLOW_REF] of [["push", "deploy", WORKFLOW_REF], ["workflow_dispatch", "followup", WORKFLOW_REF], ["schedule", "drift", WORKFLOW_REF], ["workflow_dispatch", "destroy", CLEANUP_REF]]) {
+    const env = environmentVariables({ GITHUB_EVENT_NAME, OPERATION, GITHUB_WORKFLOW_REF }); const before = clone(env);
+    assert.deepEqual(configuration(env), { config: config({ operation: OPERATION }), inputsText: INPUTS_TEXT });
     assert.deepEqual(env, before);
   }
 });
@@ -418,6 +370,24 @@ test("configuration fails closed when enablement, main branch, privacy, protecti
     { WORKSHOP_AZURE_ENABLED: "false" }, { WORKSHOP_AZURE_ENABLED: undefined }, { WORKSHOP_AZURE_ENABLED: true },
     { GITHUB_REF: "refs/heads/dev" }, { GITHUB_REF: "refs/pull/17/merge" }, { GITHUB_REF_PROTECTED: "false" }, { GITHUB_REF_PROTECTED: undefined },
     { REPOSITORY_PRIVATE: "false" }, { REPOSITORY_PRIVATE: undefined }, { GITHUB_EVENT_NAME: "pull_request" }, { GITHUB_EVENT_NAME: "pull_request_target" },
+    { REPOSITORY_TEMPLATE: "true" }, { REPOSITORY_TEMPLATE: undefined },
+  ]) assert.throws(() => configuration(environmentVariables(patch)), rejected(), JSON.stringify(patch));
+});
+
+test("configuration rejects same-name recreation, cross-lab IDs, renamed copies and missing workflow identity", () => {
+  for (const GITHUB_REPOSITORY_ID of [undefined, "1379149908", "1379147533", "01379149907", 1379149907]) assert.throws(() => configuration(environmentVariables({ GITHUB_REPOSITORY_ID })), rejected());
+  for (const GITHUB_REPOSITORY of [undefined, "other-owner/ws2-sim-20260921-azure-delivery-laboratory-07", "alvine-aurelio-org/other-copy", "alvine-aurelio-org/ws2-sim-20260921-network-module-laboratory-02"]) assert.throws(() => configuration(environmentVariables({ GITHUB_REPOSITORY })), rejected());
+  for (const GITHUB_WORKFLOW_REF of [undefined, WORKFLOW_REF.replace("main", "dev"), WORKFLOW_REF.replace("delivery.yml", "other.yml")]) assert.throws(() => configuration(environmentVariables({ GITHUB_WORKFLOW_REF })), rejected());
+});
+
+test("configuration never accepts an OPERATION inconsistent with its event and dedicated workflow", () => {
+  for (const patch of [
+    ...[undefined, "destroy", "followup", "drift", "plan"].map((OPERATION) => ({ OPERATION })),
+    { GITHUB_EVENT_NAME: "schedule", OPERATION: "deploy" },
+    ...["deploy", "plan", "drift", "destroy"].map((OPERATION) => ({ GITHUB_EVENT_NAME: "workflow_dispatch", OPERATION })),
+    { GITHUB_WORKFLOW_REF: CLEANUP_REF, OPERATION: "destroy" },
+    { GITHUB_EVENT_NAME: "schedule", GITHUB_WORKFLOW_REF: CLEANUP_REF, OPERATION: "destroy" },
+    { GITHUB_EVENT_NAME: "workflow_dispatch", GITHUB_WORKFLOW_REF: CLEANUP_REF, OPERATION: "followup" },
   ]) assert.throws(() => configuration(environmentVariables(patch)), rejected(), JSON.stringify(patch));
 });
 
@@ -433,6 +403,7 @@ test("configuration rejects malformed state/input scope and binding rejects the 
   for (const patch of [
     { STATE_STORAGE_ACCOUNT: "UPPERCASE" }, { STATE_STORAGE_ACCOUNT: "ab" }, { STATE_STORAGE_ACCOUNT: "a".repeat(25) },
     { STATE_CONTAINER: "x" }, { STATE_CONTAINER: "Bad_Container" }, { STATE_KEY: "dev/../other.tfstate" }, { STATE_KEY: "dev/plan.json" },
+    { WS2_STATE_LOCK_ID: undefined }, { WS2_STATE_LOCK_ID: "ab" }, { WS2_STATE_LOCK_ID: "state/other" }, { WS2_STATE_LOCK_ID: "a".repeat(81) },
     { WORKLOAD_RG: "rg/other" }, { WORKLOAD_RG: "rg-other" },
   ]) assert.throws(() => configuration(environmentVariables(patch)), rejected(), JSON.stringify(patch));
   assert.throws(() => configuration(environmentVariables({ WORKLOAD_INPUTS_JSON: "{broken" })), /instructor-approved non-secret/);
@@ -447,85 +418,34 @@ test("configuration rejects malformed state/input scope and binding rejects the 
   assert.throws(() => planBinding(configured.config, PROVIDER_LOCK, MODULE_LOCK_TEXT, configured.inputsText), rejected(/Plan and apply identities must be different/));
 });
 
-test("apply environment protection requires reviewers, prevention of self-review and disabled administrator bypass", () => {
-  assert.doesNotThrow(() => assertEnvironmentProtection(protection(), mainBranches(), true));
+test("environment protection always requires no reviewers and disabled administrator bypass", () => {
+  assert.doesNotThrow(() => assertEnvironmentProtection(protection(), mainBranches()));
   for (const mutate of [
-    (e) => { e.protection_rules = []; }, (e) => { delete e.protection_rules; },
-    (e) => { e.protection_rules[0].reviewers = []; }, (e) => { e.protection_rules[0].prevent_self_review = false; },
-    (e) => { delete e.protection_rules[0].prevent_self_review; }, (e) => { e.can_admins_bypass = true; }, (e) => { delete e.can_admins_bypass; },
+    (e) => { delete e.protection_rules; },
+    (e) => { e.protection_rules = [{ type: "required_reviewers", prevent_self_review: true, reviewers: [{}] }]; },
+    (e) => { e.protection_rules = [{ type: "required_reviewers", reviewers: [] }]; },
+    (e) => { e.can_admins_bypass = true; }, (e) => { delete e.can_admins_bypass; },
   ]) {
     const environment = protection(); mutate(environment);
-    assert.throws(() => assertEnvironmentProtection(environment, mainBranches(), true), rejected());
+    for (const legacyFlag of [undefined, false, true]) assert.throws(() => assertEnvironmentProtection(environment, mainBranches(), legacyFlag), rejected());
   }
 });
 
-test("both trusted environments require an explicit main-only branch policy even when planning needs no reviewer", () => {
-  const planning = { ...protection(), name: "dev-plan", protection_rules: [], can_admins_bypass: true };
-  assert.doesNotThrow(() => assertEnvironmentProtection(planning, mainBranches(), false));
-  for (const requireApproval of [false, true]) {
+test("both trusted environments use the shared main-only policy without an optional bypass flag", () => {
+  const planning = { ...protection(), name: "dev-plan" };
+  assert.doesNotThrow(() => assertEnvironmentProtection(planning, mainBranches()));
+  for (const legacyFlag of [undefined, false, true]) {
     for (const branches of [[], [{ name: "*", type: "branch" }], [{ name: "dev", type: "branch" }], [{ name: "main", type: "tag" }], [...mainBranches(), { name: "feature/*", type: "branch" }]]) {
-      assert.throws(() => assertEnvironmentProtection(protection(), branches, requireApproval), rejected(/Only the main branch/), JSON.stringify(branches));
+      assert.throws(() => assertEnvironmentProtection(protection(), branches, legacyFlag), rejected(/Only main/), JSON.stringify(branches));
     }
     for (const policy of [null, { custom_branch_policies: false, protected_branches: true }, { custom_branch_policies: true, protected_branches: true }]) {
-      assert.throws(() => assertEnvironmentProtection({ ...protection(), deployment_branch_policy: policy }, mainBranches(), requireApproval), rejected(), JSON.stringify(policy));
+      assert.throws(() => assertEnvironmentProtection({ ...protection(), deployment_branch_policy: policy }, mainBranches(), legacyFlag), rejected(), JSON.stringify(policy));
     }
   }
 });
 
-test("approval verifies exact protected main, this run's independent environment approval and real gate settings", { concurrency: false }, async () => {
-  const f = approvalFixture(); const previous = process.cwd();
-  await runApproval(f);
-  assert.equal(process.cwd(), previous);
-  assert.deepEqual(f.outputs, [["main_sha", SHA]]);
-  assert.equal(f.writes(), 1);
-  assert.match(f.summaryText.join("\n"), /Reviewer: independent-reviewer\. Run: 901/);
-  assert.deepEqual(f.calls.map((call) => call.name), ["getBranch", "getWorkflowRun", "listApprovals", "listSourcePRs", "getEnvironment", "listDeploymentBranchPolicies"]);
-});
-
-test("approval rejects author, rerunner, context-actor, bot, rejected or wrong-environment approvals", { concurrency: false }, async () => {
-  for (const [label, mutate] of [
-    ["missing approval", (m) => { m.reviews = []; }], ["rejected approval", (m) => { m.reviews[0].state = "rejected"; }],
-    ["wrong environment", (m) => { m.reviews[0].environments = [{ name: "dev-plan" }]; }], ["no environment", (m) => { delete m.reviews[0].environments; }],
-    ["bot", (m) => { m.reviews[0].user.type = "Bot"; }],
-    ["code author", (m) => { m.reviews[0].user.id = 11; m.reviews[0].user.login = "code-author"; }],
-    ["same actor ID with renamed login", (m) => { m.run.actor.id = 12; }],
-    ["same actor case-insensitive login", (m) => { m.reviews[0].user.login = "AUTHOR"; }],
-    ...["author", "rerunner", "operator"].map((login) => [login, (m) => { m.reviews[0].user.login = login; }]),
-  ]) {
-    const f = approvalFixture(); mutate(f.model);
-    await assert.rejects(runApproval(f), rejected(/real independent dev-apply environment approval/), label);
-    assert.deepEqual(f.outputs, [], label);
-    assert.equal(f.writes(), 0, label);
-  }
-});
-
-test("approval fails closed on moved/unprotected main, weakened gates and unavailable GitHub metadata", { concurrency: false }, async () => {
-  for (const [label, mutate] of [
-    ["main moved", (m) => { m.branch.commit.sha = OTHER_SHA; }], ["unprotected main", (m) => { m.branch.protected = false; }],
-    ["admin bypass", (m) => { m.environment.can_admins_bypass = true; }], ["no reviewers", (m) => { m.environment.protection_rules = []; }],
-    ["wrong branch policy", (m) => { m.branches[0].name = "dev"; }],
-  ]) {
-    const f = approvalFixture(); mutate(f.model);
-    await assert.rejects(runApproval(f), rejected(), label);
-    assert.deepEqual(f.outputs, [], label);
-    assert.equal(f.writes(), 0, label);
-  }
-  const f = approvalFixture();
-  const unavailable = Object.assign(new Error("Synthetic GitHub metadata unavailable"), { status: 503 });
-  f.model.errors.set("getEnvironment", unavailable);
-  const previous = process.cwd();
-  await assert.rejects(runApproval(f), (error) => error === unavailable);
-  assert.equal(process.cwd(), previous);
-  assert.deepEqual(f.outputs, []);
-  assert.equal(f.writes(), 0);
-});
-
-test("old-attempt approvals and source-less delivery commits are rejected", { concurrency: false }, async () => {
-  const rerun = approvalFixture(); rerun.model.run.run_attempt = 2;
-  await assert.rejects(runApproval(rerun), /Dispatch a new run/);
-  const noPR = approvalFixture(); noPR.model.sourcePRs = [];
-  await assert.rejects(runApproval(noPR), /linked to a merged reviewed main PR/);
-});
+// The scoped automatic authorization and dedicated cleanup cases are exercised
+// in deployment-authorization.test.mjs with a wholly in-memory GitHub client.
 
 test("validateLock accepts exact full-SHA source equality and moduleSource extracts one network source", () => {
   for (const subdirectory of ["", "checkpoints/v1.0.0"]) {

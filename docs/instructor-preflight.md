@@ -13,6 +13,13 @@
 Live: one approved **PRIVATE copy**. Standalone [module](../module/)/[snapshot](../vendor/network-baseline/);
 no earlier lab/release.
 
+Only **alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07**, ID
+**1379149907**, is approved for automatic mode. Use the [configuration status](delivery-configuration.md)
+for expected public setup or retained private observations; this preflight records
+no new readback. Keep false until target, budget/currency, lifetime, explicit
+bootstrap authorization and actual OIDC/state/runner/keys/module-App readiness are
+verified. Do not invent readiness or repin identities to enable another copy.
+
 Mocks prove contracts, settings prove gates, authorized rehearsal observes integration;
 none authorizes another run. Mocks cannot prove publication/cloud readiness.
 
@@ -22,13 +29,15 @@ none authorizes another run. Mocks cannot prove publication/cloud readiness.
 
 | Do | Why | Expected |
 | --- | --- | --- |
-| Administrator: verify licensed private host | Enforced gates | Missing controls → suitable private host, never public/weaker approval |
+| Administrator: verify licensed private host | Enforced controls | Missing controls → remain blocked with the owner, never public/weaker isolation |
 | Instructor: own sandbox/identities/backend/runner/recovery | Accountability | One writer |
 | PR author: inspect current diff/checks and conversations | [Author-merge source rule](pr-author-merge.md) | PR required, zero approving PR reviews; current checks must pass |
-| Deployment reviewer: inspect this run's decrypted plan privately | Independent Azure decision | Approver cannot be run actor, triggering actor or associated merged-PR author; merger may need a third eligible human |
+| Authorized owner: approve sandbox, budget, lifetime and bootstrap explicitly | Scope/accountability | No manual deployment reviewer; readiness and authorization are still required |
+| Current authenticated repo admin: separately authorize and dispatch full cleanup | Explicit owned-scope decision | One authorized owner; no independent cleanup reviewer |
 
 Participants: offline work/blocker handoff, no enablement. **Lab 07 source PRs may
-be author-merged; live Azure approval still cannot be self-approved.**
+be author-merged after passing checks; automatic exact-plan apply is not fabricated
+self-approval.** Educational progress grants no Azure authorization.
 
 ## 3. First-time setup, without touching Azure
 
@@ -59,8 +68,13 @@ Control fingerprints exclude pedagogical prose and historical evidence.
 ## 4. Configure GitHub deliberately
 
 Administrator follows [settings + reference images](delivery-configuration.md): protected
-default `main`, both environments, independent review, no self-review/admin bypass;
+current `main`, both environments main-only with no Required reviewers and no admin bypass;
 exact-workflow runners, scoped variables/keys and App transport. Labels aren't gates.
+
+If main is absent, stop at offline handoff. Only after baseline/readiness review
+may the owner establish it **while disabled**; no PR to nonexistent main or creation
+while unready. Default remains dev until the owner deliberately selects protected
+main when ready for scheduled drift. No automatic default-branch change.
 
 The actual delivery DAG is hosted **preflight → validation → privileged plan**;
 planning needs both predecessors to succeed. Hosted validation checks out the exact
@@ -68,11 +82,20 @@ event SHA and runs the four offline checks with read-only permissions, no enviro
 secrets/OIDC or trusted runner. PR checks remain hosted and credential-free. Do not
 replace this dependency with an unrelated successful PR run or an artifact from one.
 
-After separate authorization, reviewed **main push → plan → independent dev-apply
-approval → same-run apply** is the normal route. Only followup/destroy are manual;
-schedule remains report-only drift. Coordinate the first merge and have the reviewer
-ready before enabling. The existing Exercise timing gates still require later runs
+After real prerequisite authorization, reviewed **main push → validation → saved
+plan/encryption → automatic same-run exact-plan apply** is the normal route. Delivery
+dispatch offers **followup only**; cleanup is a separate authorized workflow and
+schedule remains report-only drift. Coordinate the first merge only when ready.
+The existing Exercise timing gates still require later runs
 after preceding checkpoints; do not credit skipped jobs or rewrite historical scores.
+
+Before enablement, the workflow owner must verify that the metadata-only
+[AgentAlvine workflow](../.github/workflows/agentalvine.yml) subscribes to completion
+of **Trusted dev cleanup (explicit owner authorization required)** as well as delivery.
+Changing the course's cleanup filename/job names does not install that event wiring.
+Retain trusted-default-branch loading, no cloud tokens/artifact execution and the
+reviewed workflow checker/reference pins. Missing wiring stays pending; do not
+dispatch delivery, edit progress or manufacture an event to compensate.
 
 ## 5. Obtain the instructor-owned infrastructure prerequisites
 
@@ -84,7 +107,7 @@ Separately authorized [identity/state verification](identity-state.md):
 | Separate OIDC identities | Least privilege | Plan RG **Reader**; apply RG-only **Contributor**; no subscription/role-assignment authority; both team-container **Storage Blob Data Contributor** for leases |
 | Verify federation | Narrow trust | Exact per-environment issuer/audience/subject; no token logging |
 | Verify private backend/runner | Isolated access | Account/container/key, DNS/routes/TLS/recovery; ephemeral Linux x64, no ambient identity |
-| Verify independent human workstation/key escrow | Safe review | No private keys in PRs |
+| Verify encryption pairing and apply-only private key; any owner escrow is separately controlled | Safe handling | No private keys in PRs; no manual reviewer gate |
 
 ## 6. Keep the enablement decision honest
 
@@ -94,7 +117,13 @@ Separately authorized [identity/state verification](identity-state.md):
 | Instructor evaluates actual dry-run/go-no-go | Docs/mocks/skips ≠ approval | Participants wait |
 
 [Encrypted review](plan-review.md): **2-hour validity / 1-day retention**; retention never
-extends validity. **New runs + fresh independent approval**, never credentialled reruns.
+extends validity. **New authorized runs + fresh exact plans**, never credentialled reruns.
+Bootstrap mutations need explicit owner authorization, not this document's existence.
+Dedicated [cleanup](../.github/workflows/cleanup.yml) requires string
+`authorization` = `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`,
+no operation input, and a current authenticated admin's explicit owned-scope decision.
+The helper checks admin/actor/sender/trigger IDs, current SHA/state and same-run
+validation/plan. No independent cleanup reviewer. Ordinary main never cleans up.
 
 ## 7. Source-inspection findings and final handoff
 
@@ -113,6 +142,8 @@ ARM configuration or final resource-absence reads. Require those actual observat
 in a separately authorized live rehearsal. Private handoff:
 verifier/date/revision/results/blocker owners; no actual IDs/secrets/private links/raw
 screenshots here. Automatic AgentAlvine Exercise updates, no evidence PR/manual progress.
+
+Require the [hands-on configuration and benign HCL update activity](workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update): actual portal properties, an agreed non-reserved tag update through checks-passing PR/main, no replacement and unchanged IDs, then a fresh exit-0 followup. The driver outputs alone cannot prove those observations; no zero-cost assumption or new verification is made by this guide.
 
 [Recovery](recovery.md): never unlock active leases. **Full cleanup mandatory**:
 same root/state, no targets, empty managed state **and** inventory; retain shared

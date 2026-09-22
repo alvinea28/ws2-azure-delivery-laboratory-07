@@ -1,4 +1,4 @@
-# Lab 07 · Activity 01 — Map identity and state without enabling Azure
+# Lab 07 · Activity 01 — Construct Actions and map identity/state offline
 
 [Review index](README.md) · [Setup](00-start-here.md) · [Next activity](activity-02.md) · [Simulation evidence](simulation.md)
 
@@ -6,7 +6,7 @@
 > **Review copy, not a second progress tracker.** The complete canonical lesson follows. Learners follow the live **Exercise issue in their own private copy**, opened from that copy's README; AgentAlvine updates the same issue body. The public source preview awards no learner progress. Reading later live lessons grants no Azure authorization.
 
 <!-- FULL-WS-LESSON:START -->
-# Lab 07 · Step 1 — Map identity and state without enabling Azure
+# Lab 07 · Step 1 — Construct Actions and map identity/state offline
 
 **Goal:** Construct the single disabled delivery workflow and separate workload permissions from state-lease permissions, then hand off the tested YAML and identity map.
 
@@ -19,7 +19,7 @@
 | Tools | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0** |
 
 > [!WARNING]
-> **Public templates remain inert; keep `WORKSHOP_AZURE_ENABLED=false`.** No earlier lab or Azure account is needed. This step permits no Azure sign-in, identity creation, state access, real backend initialization, local apply/destroy, or Copilot cloud tools. Live Lab 07 is **not solo**: independent protected-workflow approval remains required.
+> **Public templates remain inert; keep `WORKSHOP_AZURE_ENABLED=false`.** No earlier lab or Azure account is needed. This step permits no Azure sign-in, identity creation, state access, real backend initialization, local apply/destroy, or Copilot cloud tools. The exact approved private route uses automatic exact-plan apply with no manual deployment reviewer; real scope/budget/bootstrap prerequisites remain separate.
 
 ## Do
 
@@ -63,7 +63,20 @@ Live readiness is pending instructor verification; this map enables nothing.
 
 Follow [the complete workflow-authoring tutorial](../docs/workflow-authoring.md). The installed workflow is already complete: use the separate teaching reference to construct its sections in an untitled YAML buffer, then save the complete result into **the same canonical file**. Keep `WORKSHOP_AZURE_ENABLED=false`, all guards, exact action/tool pins and the existing helpers. Never install another main deployment file or commit a partial workflow.
 
-Explain the hosted `preflight` → same-SHA `validation` → trusted `plan` dependency in your map. Also explain main push → plan → independent `dev-apply` approval → **same-run apply**, without another deploy dispatch. Only followup/destroy are manual. Exact reconstruction may leave no YAML diff; do not manufacture one.
+**Hands-on phase checklist:** in VS Code **File → New Text File → YAML**, construct and explain each complete reference section in order:
+
+| Section to create | Expected behavior |
+| --- | --- |
+| Header through `jobs:` | Main-push trigger, followup-only dispatch, report-only schedule; no inherited secrets or broad permissions |
+| `preflight` | Exact approved private identity, protected current main, rules, merged PR, attempt and environment checks |
+| `validation` | Hosted credential-free checks at the same SHA before privileged planning |
+| `plan` | Separate OIDC identity, locked owned state, exact saved plan and encrypted artifact |
+| `apply` | Automatic same-run exact-plan apply; no approvals API, reviewer wait or second deploy button |
+| `followup` / `drift` | Fresh exit-0 confirmation or report-only drift; neither applies nor cleans up |
+
+Compare the whole buffer, then replace only the canonical workflow **in one save**. Leave the dedicated cleanup workflow and non-runnable solutions unchanged. Missing sections or mismatched pins mean stop and compare, never relax the checker.
+
+Explain the hosted `preflight` → same-SHA `validation` → trusted `plan` dependency in your map. Also explain main push → saved plan/encryption → automatic **same-run apply**, without another deploy dispatch or reviewer wait. Delivery dispatch is **followup only**; [cleanup.yml](../.github/workflows/cleanup.yml) is separately owner-authorized with required string `authorization`, no operation input. Exact reconstruction may leave no YAML diff; do not manufacture one.
 
 ### 4. Check the constructed workflow and isolated baseline
 
@@ -76,7 +89,7 @@ npm run workflow:check
 node scripts/check-learner.mjs
 ```
 
-**Why:** Node tests exercise both accepted and rejected control configurations; the kit checks the guide; the workflow checker requires the pinned reference plus exactly one canonical delivery workflow and three reviewed companions. Each command must pass. None enables Azure or completes a live gate.
+**Why:** Node tests exercise both accepted and rejected control configurations; the kit checks the guide; the workflow checker requires pinned references, one canonical delivery workflow, one separately authorized cleanup workflow and three credential-free/guide companions. Each command must pass. None enables Azure or completes a live gate.
 
 **Why:** The [helper](../scripts/check-learner.mjs) verifies source/lock/vendor hashes and runs **two consumer mock cases** in a disposable backend-disabled root with read-only provider lock. Require both cases and overall success; downloads need internet, not Azure.
 
@@ -90,7 +103,7 @@ The supplied [snapshot](../docs/dependency-snapshot.md) pins `4414e56b409a467855
 | Source Control | Commit `lab: construct delivery workflow and map identity`; **Publish Branch** to existing `origin`, later **Push** |
 | GitHub | Compare newest branch SHA; inspect **Actions → Workshop quality** and **Lab checks**; refresh your existing **Exercise** body |
 
-No protected `main`/sandbox? Hand the pushed branch to the instructor; do not invent `main` or substitute `dev`. Only an approved, reviewed protected-main PR may merge later. Coordinate merges: once enabled, a main push can request deployment.
+No protected `main`/sandbox? Hand the pushed branch to the instructor; do not invent `main`, open a PR into a nonexistent branch or substitute `dev`. Consult [configuration status](../docs/delivery-configuration.md), not stale setup assumptions. Owner target, budget/currency, lifetime and explicit bootstrap authorization plus verified OIDC/state/runner/keys/module App are prerequisites; this activity verifies none of them. Keep false and default dev. The owner establishes protected main while disabled only after baseline/readiness review. Later, the author may merge their own PR after strict checks and resolved conversations, with zero required approving reviews. Once enabled, its main push automatically applies the exact saved plan. Public source maintenance stays on dev; never repin the allowlist for another copy.
 
 **Expected / gate:** The committed map contains all eight role/field terms shown above and no `TODO`; required workflow checks pass at the current SHA. The existing Step 1 gate still checks the map only, not authorship or deployment; this adds no new score. AgentAlvine advances only offline study; no manual checkbox, evidence PR or run-ID submission.
 

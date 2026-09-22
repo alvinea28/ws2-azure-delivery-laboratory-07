@@ -6,7 +6,7 @@
 
 ## 1. Do — confirm an eligible live baseline
 
-Use the **existing approved private Lab 07 writer**, not another copy. Finish [setup](../docs/start-here.md) and [own Azure inputs](../docs/azure-setup.md). Confirm [preflight](../docs/instructor-preflight.md) and [live controls](activity-02.md): current protected `main`, distinct identities, private backend, restricted runner and independent encrypted-plan review. Missing readiness means **BLOCKED**, not learner enablement.
+Use the **existing approved private Lab 07 writer**, not another copy. Finish [setup](../docs/start-here.md) and [own Azure inputs](../docs/azure-setup.md). Confirm [preflight](../docs/instructor-preflight.md) and [live controls](activity-02.md): current protected main, distinct identities, private backend, restricted runner and automatic encrypted exact-plan apply. Main-only environments have no Required reviewers and no admin bypass; no manual deployment reviewer. Missing scope/budget/bootstrap readiness means **BLOCKED**, not learner enablement or proof from documentation.
 
 Require actual eligible [deploy](activity-03.md) and separate [followup](activity-04.md) runs for the applicable revision—not historical/mock/skipped proof. Confirm Defender onboarding, exact assigned RG, read access and approved region. Applications require their own region/permissions; a VNet supplies neither. **No paid Defender plans without explicit cost consent.**
 
@@ -24,7 +24,7 @@ Open **Recommendations** with the same scope filters. Select an actual finding; 
 
 Choose an instructor-approved finding within workload ownership. Map its property to the [dev caller](../environments/dev/main.tf) and [input contract](../environments/dev/variables.tf). Correct Terraform on a controlled task branch: [inspect diff, commit/push](../docs/git-workflow.md), credential-free checks, reviewed PR to protected `main`. Module changes need approved release/pin/snapshot review; editing the vendor copy cannot update the pinned source.
 
-**Why/Expected:** reproducible repair through the **same writer/root/state**. Use Step 3 for a **new deploy**: fresh plan → independent exact-plan review → apply; Step 4 for a **new followup**, current applicable SHA, attempt **1**. [Plan review](../docs/plan-review.md) explains bindings. Never reuse plans, self-approve or rerun credentialled jobs.
+**Why/Expected:** reproducible repair through the **same writer/root/state**. Use Step 3 for a **new deploy**: validation → fresh encrypted plan → automatic exact-plan apply; Step 4 for a **new followup**, current applicable SHA, attempt **1**. [Plan integrity](../docs/plan-review.md) explains bindings. The author may merge their own passing PR with zero approving reviews and resolved conversations; never bypass checks, reuse plans or rerun credentialled jobs.
 
 **Fix:** if remediation exceeds baseline/ownership/policy, stop. Do not substitute AVM roots, edit controls or use portal **Quick fix** to create drift.
 
@@ -36,7 +36,7 @@ Inspect successful apply and **Confirm no-change** jobs, the deployed property, 
 
 ## 5. Cleanup — mandatory after live work
 
-Follow [Step 5's browser route or explained CLI alternative](activity-05.md). Request a **new full destroy** at current applicable protected-main SHA, attempt **1**, same writer/root/state: fresh encrypted plan and **separate independent approval**. No targets, broad RG deletion or state editing.
+Follow [Step 5's browser route or explained CLI alternative](activity-05.md). The authenticated current repo admin separately authorizes owned-scope full cleanup and dispatches [cleanup.yml](../.github/workflows/cleanup.yml), current protected-main SHA, attempt **1**, same writer/root/state/concurrency/environments/identities. Required string `authorization` = `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`; no operation input or independent cleanup reviewer. A fresh validated encrypted destroy plan is applied exactly. Ordinary main never cleans up; no targets, broad RG deletion or state editing.
 
 Require successful plan/destroy jobs and **empty managed-state proof plus real Azure inventory**, including retained owners. Dispatch or stale Defender Inventory is not deletion proof.
 

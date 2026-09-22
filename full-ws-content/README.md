@@ -4,12 +4,27 @@
 
 **Goal:** Review all five complete lessons; follow **your private copy's Exercise** for grading. This is a static mirror, not another exercise. Marker-bounded bodies preserve canonical text/examples, with only outside-fence Markdown links rebased. [Course manifest](../.github/agentalvine/course.json).
 
-**Required core tutorial:** [Construct the one protected delivery workflow](../docs/workflow-authoring.md), part of activities 01–02, not an optional extension. Use the [non-runnable complete reference](../solutions/delivery.yml), keep enablement false, and run the credential-free checker. Main push leads to same-run approved apply; only followup/destroy are manual. Historical outcomes below remain unchanged and do not attest this new task.
+## Required hands-on activity — visible phase checklist
+
+Use the [existing workflow-authoring guide](../docs/workflow-authoring.md), part of activities 01–02, not a new course or optional reading assignment.
+
+| Phase | Do / expected output |
+| --- | --- |
+| **Construct** | VS Code **File → New Text File → YAML**; use the [non-runnable reference](../solutions/delivery.yml) section by section: header, preflight, validation, plan, automatic apply, followup/drift; replace only the complete canonical file in one save while false |
+| **Validate** | Identity map plus Node/kit/workflow/two consumer mocks; inspect current-SHA **Workshop quality / Lab checks**, not a skipped delivery run |
+| **Owner readiness** | Inspect settings, scoped secret names and runner access; owner authorizes target, budget/currency, lifetime and bootstrap, then verifies OIDC/state/leases/keys/module App |
+| **Automatic private apply** | Checks-passing author-merged PR → protected-main push → same-SHA validation → encrypted saved plan → automatic exact-plan apply; no approvals API, reviewer wait or second deploy button |
+| **Verify/update** | [Actual Azure configuration and benign HCL tag update](../docs/workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update), in-place change, no replacement and the same resource IDs; output IDs alone are not configuration proof |
+| **Followup/cleanup** | Delivery's manual menu: **followup only**, exit 0; current admin separately authorizes [cleanup.yml](../.github/workflows/cleanup.yml), required `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`, no operation input; verify empty managed state plus actual inventory |
+
+These phases retain the five original checkpoint meanings and award no manual progress. Ordinary main never cleans up. Historical outcomes below remain unchanged and do not attest this task.
 
 **Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](defender-posture-hands-on.md), the full guide with rebased links. Requires actual eligible deploy/followup in the existing approved writer; unexecuted instructions add no historical proof or automatic grade.
 
 > [!WARNING]
-> **Public templates remain inert; live Lab 07 is not solo.** Reading is not execution authorization. Preserve [all live controls](activity-02.md), independent deploy/destroy approvals and [mandatory full cleanup](activity-05.md). The separate AVM **4.81** profile is not connected to baseline **5.4.0** live delivery. No new live proof is claimed.
+> **Public templates and unapproved copies remain inert.** Only the exact private identity in [configuration](../docs/delivery-configuration.md) is eligible; do not repin the allowlist. Preserve [all live controls](activity-02.md): strict checks, main-only environments with no Required reviewers/admin bypass, scoped OIDC, locked state and encrypted exact plans. [Mandatory full cleanup](activity-05.md) is separately admin-authorized. The separate AVM **4.81** profile is not baseline **5.4.0** live delivery. No new live proof is claimed.
+
+Keep false and default dev; missing main/readiness means offline handoff, not invented settings or a PR to nonexistent main. Only after owner baseline/readiness review may protected main be established while disabled. Public source maintenance stays on dev. The [configuration guide](../docs/delivery-configuration.md) describes expected public setup, not private observations.
 
 ## Do — one copy, one Exercise
 
@@ -20,6 +35,8 @@
 **Expected:** Offline identity study can advance; missing live prerequisites remain blocked. [Azure inputs/login](azure-setup.md) are optional account preparation, not provisioning permission; local/PR checks stay credential-free.
 
 **Recovery:** If Exercise is missing, inspect [startup troubleshooting](../docs/troubleshooting.md#agentalvine-or-the-exercise-is-missing), then only in your copy use **Actions → AgentAlvine → Run workflow → Check progress**, actual default branch (normally `dev`). This reconciles the guide; it does not run delivery or bypass pending gates. Never select learner Preview or create duplicate issues.
+
+The original titles and pending reasons below include the **then-required independent review**. They are historical, not current reviewer blockers; follow the linked current activities for automatic apply and dedicated cleanup. No original result is rewritten.
 
 ## Complete activity sequence and original A/B status
 

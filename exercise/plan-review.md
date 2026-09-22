@@ -1,5 +1,6 @@
 # Review the real plan
 
 TODO: describe the fresh plan, commit/state binding, digest and 2 hours limit.
-An independent reviewer inspects the encrypted plan using instructor access,
-then approves the actual run. An issue checkbox never authorizes Azure apply.
+Explain automatic exact-plan apply after protected-main validation and the
+separate cleanup authorization. No manual deployment reviewer is required for
+this approved private copy. An issue checkbox never authorizes Azure apply.

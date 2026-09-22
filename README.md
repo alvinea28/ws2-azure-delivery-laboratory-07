@@ -2,10 +2,12 @@
 
 **Public source template (not the clone URL after copying):** [alvinea28/ws2-azure-delivery-laboratory-07](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07) · **Recommended order:** 07 of 08 · **Time:** 45–60 minutes offline; live timing depends on instructor readiness
 
-**Goal:** Construct the one protected delivery workflow and map identity/state offline, then follow main push → validation → plan → independent review → same-run apply → followup → destroy. A complete module/snapshot is supplied; **no earlier lab or Azure account is needed for offline study**.
+**Goal:** Create GitHub Actions YAML in VS Code and map identity/state offline, then follow the authorized private lifecycle: protected-main push → same-SHA validation → encrypted saved plan → automatic exact-plan apply → real configuration/update checks → followup → separately authorized cleanup. This **independent** lab supplies a complete module/snapshot; **no earlier lab or Azure account is needed for offline study**.
 
 > [!WARNING]
-> **Public templates remain inert. Live Lab 07 is not solo:** one approved private writer, protected current `main` and independent reviewers remain mandatory. [All live safeguards](.github/steps/02.md) still apply. Missing readiness means **BLOCKED**, not self-approval. After actual provisioning, [full reviewed cleanup](.github/steps/05.md) is mandatory; retain shared RG/backend/identities/runner.
+> **Public templates and unapproved copies cannot deploy.** Automatic delivery is limited to the exact approved private identity in the [configuration guide](docs/delivery-configuration.md), not every repository named Lab 07. Do not edit or repin that allowlist to enable another copy. No manual deployment reviewer or second deploy button is required; protected main, strict checks, separate OIDC identities, locked state and encrypted exact plans remain mandatory. Bootstrap and cleanup require separate owner authorization.
+
+**Setup status:** this public source describes expected controls, not private configuration observations or a completed Azure run. Keep `WORKSHOP_AZURE_ENABLED=false`; inspect settings with the owner, never invent target, budget/currency, lifetime or prerequisites. Maintenance stays on **dev**. Missing protected main means offline handoff, not creating main or changing the default while unready.
 
 ## Start here — five actions
 
@@ -39,16 +41,29 @@ Select the intended Owner, keep **Private**, leave **Include all branches** off,
 ## Expected result / next
 
 **Source PRs:** [inspect and merge your own PR after required checks](docs/pr-author-merge.md).
-This Lab 07 policy requires zero approving PR reviews, not self-approval; independent
-Azure plan/apply/cleanup approvals remain mandatory.
+This Lab 07 policy requires zero approving PR reviews, not self-approval; scope,
+budget, lifetime, bootstrap and cleanup authorizations remain separate owner decisions.
 
 Refresh **your copy's Exercise link** and follow its current task, starting on `lab/workflow-authoring`. AgentAlvine updates the **same issue body** from real work/checks. No manual checkboxes, run IDs or evidence PRs; PR validation remains credential-free.
 
-**Required core tutorial:** [Construct the single delivery workflow](docs/workflow-authoring.md) during Step 1, with `WORKSHOP_AZURE_ENABLED=false`. The installed workflow is already complete; [solutions/delivery.yml](solutions/delivery.yml) is its non-runnable teaching reference. Reconstruct the canonical file, never a duplicate, then run `npm run workflow:check`. Step 2 observes an authorized **main push**, not another deploy dispatch; only followup/destroy are manual.
+## Hands-on activity — create Actions, then the authorized Azure lifecycle
+
+Do these phases in the [existing workflow-authoring guide](docs/workflow-authoring.md), starting in [Step 1](.github/steps/01.md). This is required work, not a link-only reading assignment or extra progress checkpoint.
+
+| Phase | Your action / expected result | Stop or recover |
+| --- | --- | --- |
+| **Build YAML offline** | VS Code **File → New Text File → YAML**: construct header, preflight, validation, plan, automatic apply, followup/drift section by section from the [non-runnable reference](solutions/delivery.yml). Replace only the complete canonical workflow in one save while disabled | Already complete baseline ≠ your authorship; no duplicate or partial live file. Exact reconstruction may have no YAML diff |
+| **Test and explain** | Complete the identity map; run Node, kit, workflow and two consumer mock checks; inspect **Actions → Workshop quality / Lab checks** at the current SHA | Fix the source, not the tests/pins. Mocks and skipped delivery are not Azure proof |
+| **Owner readiness** | Inspect **Settings → Rules / Environments / Actions variables**, scoped secret names and runner access with the owner; obtain target, budget/currency, lifetime and bootstrap authorization; verify OIDC, backend/leases, runner, keys and module App | Keep false; no PR into absent main, invented values or environment-reviewer placeholder |
+| **Automatic private deployment** | Once ready, author merges the checks-passing PR into protected main; inspect **Verify scoped dev deployment policy → Validate reviewed delivery revision → Trusted dev plan → Apply exact dev saved plan** in one SHA-bound run | No approvals API, reviewer wait or second deploy dispatch; only the approved private writer can proceed |
+| **Verify and update** | Observe actual Azure configuration, then an owner-approved benign HCL tag update through another passing PR/main push; expect update/no replacement and the same resource IDs | The driver checks output IDs, not Azure configuration. Follow the [live verification activity](docs/workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update) |
+| **Converge and clean up** | Delivery **Run workflow → main → followup** must report exit **0**. A current admin separately authorizes [cleanup.yml](.github/workflows/cleanup.yml), required string `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`, **no operation input** | Ordinary main never cleans up. Require empty managed state plus actual inventory; retain shared RG/backend/identities/runner |
+
+AgentAlvine only observes real metadata and updates the same Exercise body. No manual checkbox or evidence PR can award a phase or authorize Azure. The five original checkpoint meanings remain; use [Step 2](.github/steps/02.md) for timing and live readiness.
 
 [All five activities and historical outcomes](full-ws-content/README.md) · [Source Exercise #1: read-only Preview, zero learner progress](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/issues/1). Neither is a new learner's grade or live authorization.
 
-**Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](docs/defender-posture-hands-on.md). Requires the existing approved private writer and actual deploy/followup; independent approvals and mandatory full cleanup remain unchanged. No execution or automatic grade is claimed.
+**Additional hands-on:** [Defender runtime posture, Terraform remediation and cleanup](docs/defender-posture-hands-on.md). Requires the existing approved private writer and actual deploy/followup; scope/cost authorization and separately authorized full cleanup remain necessary. No execution or automatic grade is claimed.
 
 **Recovery:** [Setup](docs/start-here.md) · [Git actions](docs/git-workflow.md) · [Troubleshooting](docs/troubleshooting.md). Instructor-directed [Azure inputs/login](docs/azure-setup.md) are optional account preparation, not provisioning permission. AVM **4.81** is separate from the **5.4.0** baseline, not live-connected.
 

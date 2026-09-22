@@ -11,7 +11,7 @@ on:
   release:
     types: [published]
   workflow_run:
-    workflows: [Workshop quality, Lab checks, Trusted dev delivery (instructor enablement required)]
+    workflows: [Workshop quality, Lab checks, Trusted dev delivery (instructor enablement required), Trusted dev cleanup (explicit owner authorization required)]
     types: [completed]
   workflow_dispatch:
     inputs:

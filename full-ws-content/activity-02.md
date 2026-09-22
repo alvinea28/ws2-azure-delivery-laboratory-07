@@ -8,7 +8,7 @@
 <!-- FULL-WS-LESSON:START -->
 # Lab 07 · Step 2 — Observe a real instructor-enabled dev plan
 
-**Goal:** Observe the real plan from an approved main push, then independent approval and exact-plan apply in that same run. Planning success is not approval.
+**Goal:** Observe the real plan from an approved main push and automatic exact-plan apply in that same run. Planning success alone is not deployment or Azure authorization.
 
 | Working context | Selection |
 | --- | --- |
@@ -18,16 +18,25 @@
 | Tools / event | Node **24.16.0**, Terraform **1.16.1**, AzureRM **5.4.0** / `push` to `main` selects `deploy` |
 
 > [!WARNING]
-> **Public templates remain inert. Live Lab 07 is not solo.** Only instructor authorization enables this private writer after preflight. No authoring cloud operations, learner enablement, local real backend/state access, identity creation or Copilot cloud tools.
+> **Public templates remain inert. No manual deployment reviewer is required.** Only real scope/budget/bootstrap authorization and readiness permit enablement of this exact private writer. No authoring cloud operations, learner enablement, local real backend/state access, identity creation or Copilot cloud tools.
 
 ```mermaid
 flowchart LR
-	M[Reviewed main push] --> V[Hosted same-SHA checks] --> P[Plan] --> R[Independent review] --> A[Same-run apply] --> F[Manual followup] --> D[Manual destroy]
+    M[Reviewed main push] --> V[Hosted same-SHA checks] --> P[Saved plan and encryption] --> A[Automatic same-run exact apply] --> F[Manual followup] --> D[Separate owner-authorized cleanup]
 ```
 
-Plain text: main push → credential-free validation → plan → independent `dev-apply` approval → same-run apply. **No second deploy dispatch.** Followup and destroy are separate manual requests; destroy needs a new plan and independent review. Do not reuse an earlier run's artifact.
+Plain text: main push → credential-free validation → saved plan/encryption → automatic same-run exact-plan apply. **No second deploy dispatch or reviewer wait.** Delivery's manual choice is **followup only**. Cleanup has a separate workflow and explicit current-admin authorization; ordinary main never cleans up. Do not reuse an earlier run's artifact.
 
 ## Do
+
+**Hands-on phase checklist — only after readiness:**
+
+| Phase | Action / expected result |
+| --- | --- |
+| Construct first | Step 1: VS Code untitled YAML, header/preflight/validation/plan/apply/followup/drift, one complete canonical save while false; local checks and current-SHA CI pass |
+| Inspect, do not invent | Owner checks **Settings → Rules / Environments / Actions variables**, secret names and runner access; authorizes target, budget/currency, lifetime and bootstrap; verifies OIDC/state/leases/keys/module App |
+| Merge and observe | Author's checks-passing PR into ready protected main starts same-SHA validation, saved-plan encryption and automatic exact-plan apply; no second deploy button |
+| Verify the lifecycle | Actual Azure configuration, then an approved benign HCL update with no replacement/same IDs, fresh followup exit 0 and separately authorized admin cleanup; [detailed activity](../docs/workflow-authoring.md#6-hands-on-verify-configuration-and-make-a-benign-update) |
 
 ### 1. Confirm every prerequisite with the instructor
 
@@ -35,18 +44,18 @@ Use [instructor preflight](../docs/instructor-preflight.md) and [delivery config
 
 | Required boundary | Instructor confirmation |
 | --- | --- |
-| Writer and code | Exact private copy; protected current `main`; reviewed merged-PR association; approved sandbox/revision |
+| Writer and code | Private non-template **alvine-aurelio-org/ws2-sim-20260921-azure-delivery-laboratory-07**, ID **1379149907**; protected current `main`; actual merged-PR association; approved sandbox/revision; wrong IDs/public/templates fail |
 | Authoring and validation | [Required Step 1 tutorial](../docs/workflow-authoring.md) completed while disabled; current PR checks; hosted delivery validation checks out `${{ github.sha }}` before `plan` can start |
 | Identities | Distinct `AZURE_PLAN_CLIENT_ID` / `AZURE_APPLY_CLIENT_ID`: workload-RG Reader / Contributor; exact authorized OIDC subjects |
 | Backend | Approved private account/container/key and runner DNS/routes; both identities have container-scoped **Storage Blob Data Contributor** for leases |
 | Concurrency | One writer; state-specific `WS2_STATE_LOCK_ID`; no cancellation of active writers; blob locking enabled |
 | Runner | Clean restricted allowed-workflow runner, labels `self-hosted`, `linux`, `x64`, `ws2-trusted`; PRs cannot use it |
-| Environments | `dev-plan` / `dev-apply`: explicit branch-`main`-only policies; required independent `dev-apply` reviewers; self-review prevented; administrator bypass disabled |
-| Reviewer | Neither run actor/triggering actor nor PR/deployed code author; required licensing/access actually available |
+| Environments | `dev-plan` / `dev-apply`: explicit branch-`main`-only policies; **no Required reviewers**; administrator bypass disabled |
+| Owner authorization | Approved RG/region/ranges, budget/currency, lifetime and explicit bootstrap authorization; separately assigned cleanup owner |
 | Inputs and transport | Existing `WORKLOAD_RG`; approved `WORKLOAD_INPUTS_JSON` and locks; narrowly scoped module transport, never PR credentials |
-| Encryption | Public key configured; decryption key restricted to `dev-apply` and approved reviewer escrow |
+| Encryption | Public key configured; decryption key restricted to `dev-apply`; any owner recovery/inspection escrow is private, not a reviewer gate |
 
-Missing any requirement? Keep `WORKSHOP_AZURE_ENABLED=false`, record **BLOCKED**, and stop. Never invent `main`, widen roles or replace independent approval with self-checking.
+Missing any requirement? Keep `WORKSHOP_AZURE_ENABLED=false`, record **BLOCKED**, and stop. Consult [configuration status](../docs/delivery-configuration.md); these instructions are not a new settings or Azure readback. Never invent values, open a PR into nonexistent main or create it while unready. The owner establishes protected main while disabled only after baseline/readiness review. Public-template maintenance stays on dev; unapproved private copies remain offline and must not repin the allowlist.
 
 ### 2. Observe the reviewed main push — do not dispatch deploy
 
@@ -58,9 +67,9 @@ Coordinate one reviewed PR merge into protected `main`. If the original authorin
 | --- | --- |
 | Event / branch | **push / main** — trusted reviewed code, not default `dev` or a PR head |
 | SHA / attempt | Exact current main commit / **1** |
-| Operation | `deploy`, selected by the existing push policy; the same run will wait for independent `dev-apply` approval |
+| Operation | `deploy`, selected by the push policy; the same run automatically applies the exact saved plan after scoped authorization |
 
-Do not select **Run workflow** for deployment and never select **Re-run jobs**. Only `followup` and `destroy` remain in the manual menu; scheduled `drift` reports without applying. Read [Step 3's independent review procedure](activity-03.md#4-independently-inspect-and-approve-the-exact-artifact) **before this first enabled merge**, so the reviewer is ready for this run's approval request.
+Do not select **Run workflow** for deployment and never select **Re-run jobs**. Only **followup** remains in delivery's manual menu; [dedicated cleanup](activity-05.md) accepts a required authorization string, no operation input. Scheduled drift reports without applying, but needs the owner's deliberate protected-main default choice when ready; the offline default dev is not changed automatically. Read [Step 3's exact-plan observations](activity-03.md#4-observe-scoped-authorization-and-exact-plan-application) before the first enabled merge.
 
 ![GitHub reference showing the workflow-selection sidebar](../docs/images/github-workflow-sidebar.webp)
 
@@ -68,9 +77,9 @@ Do not select **Run workflow** for deployment and never select **Re-run jobs**. 
 
 ### 3. Inspect actual execution and protected artifacts
 
-Require **Verify instructor gate configuration**, then **Validate reviewed delivery revision**, then **Trusted dev plan**, to succeed. Validation runs `npm test`, `kit:check`, `workflow:check` and the existing backend-disabled provider-mocked learner helper on hosted Ubuntu, without secrets/OIDC/trusted-runner access. Failure stops before privileged planning; an unrelated green PR run is not a substitute for this exact-SHA dependency.
+Require **Verify scoped dev deployment policy**, then **Validate reviewed delivery revision**, then **Trusted dev plan**, to succeed. Validation runs `npm test`, `kit:check`, `workflow:check` and the existing backend-disabled provider-mocked learner helper on hosted Ubuntu, without secrets/OIDC/trusted-runner access. Failure stops before privileged planning; an unrelated green PR run is not a substitute for this exact-SHA dependency.
 
-In **Summary**, compare source/module/state/run/attempt/operation and inspect creates, updates, deletes, replacements and output caveats. The independent reviewer privately inspects the exact encrypted-plan contents and approves `dev-apply` using Step 3; **Apply reviewed dev plan** then resumes in this run without another dispatch. Never approve just to advance the Exercise.
+In **Summary**, compare source/module/state/run/attempt/operation and inspect creates, updates, deletes, replacements and output caveats. **Apply exact dev saved plan** automatically consumes this run's encrypted saved plan after fresh identity/live-rules/current-main/merged-PR/same-run checks. No approvals API is used. Destroy or replacement actions on regular pushes fail. Never treat issue progress as authorization or publish plaintext plans.
 
 | Terraform detailed exit | Meaning |
 | --- | --- |
@@ -82,15 +91,15 @@ Only an **AES-256-GCM / RSA-OAEP encrypted envelope** may be uploaded. Its run-s
 
 ### 4. Check the Exercise gate
 
-**Expected:** Refresh the existing issue after the **whole run completes**. AgentAlvine requires the actual same-repository delivery run on `main`, current observed SHA, attempt **1**, created after course start and no earlier than the preceding checkpoint, with **Trusted dev plan** successful. A plan still waiting for apply approval does not yet satisfy that completed-run gate. Old, queued, skipped or fixture jobs do not count; no run-ID submission, evidence PR or manual progress edit.
+**Expected:** Refresh the existing issue after the **whole run completes**. AgentAlvine requires the actual same-repository delivery run on `main`, current observed SHA, attempt **1**, created after course start and no earlier than the preceding checkpoint, with **Trusted dev plan** successful. A successful plan inside an unfinished run does not satisfy that completed-run gate. Old, queued, skipped or fixture jobs do not count; no run-ID submission, evidence PR or manual progress edit.
 
-The historical checker accepts eligible push, dispatch and schedule records; it is not push-only. This lesson deliberately uses **push / main**. After this checkpoint is recorded, Step 3's review-note PR creates a **later main-push run** with its own fresh plan/apply; the earlier run cannot satisfy a later checkpoint's time boundary. The five gates and historical scores are unchanged.
+The metadata observer accepts eligible push, dispatch and schedule records; it is not push-only or an authorization engine. This lesson deliberately uses **push / main**. After this checkpoint is recorded, Step 3's explanation-note PR creates a **later main-push run** with its own fresh plan/apply; the earlier run cannot satisfy a later checkpoint's time boundary. Five steps remain; original Step 1 completion and historical scores are preserved. Step 5 now follows the actual dedicated cleanup workflow.
 
 The current driver checks scoped output IDs after apply, not real Azure configuration. Instructor-observed configuration and later cleanup inventory remain separate required live verification, never inferred from tests or job names.
 
 **Recovery:** Comment **BLOCKED**, the sanitized failure category and instructor next action. Resolve missing access/runner/lease controls without public-backend workarounds, unlocks or privilege expansion; then use a new authorized run, never a credentialled rerun.
 
-**Next:** [Step 3: independently reviewed deploy](activity-03.md). Offline success cannot unlock it.
+**Next:** [Step 3: automatic exact-plan deploy](activity-03.md). Offline success cannot unlock it.
 <!-- FULL-WS-LESSON:END -->
 
 ## Original Cycle A/B outcome — 2026-09-08

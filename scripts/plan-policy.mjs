@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { textHash, bytesHash } from "./module-snapshot.mjs";
+import authorization from "./deployment-authorization.cjs";
 
 export const TERRAFORM_VERSION = "1.16.1";
 export const PROVIDER_VERSION = "5.4.0";
@@ -12,10 +13,8 @@ export function planExit(code) {
   return code === 0 ? "no-change" : "changes";
 }
 
-export function operationFor(event, input) {
-  const operation = event === "schedule" ? "drift" : event === "push" ? "deploy" : input;
-  assert.ok(OPERATIONS.has(operation), "Unsupported operation");
-  return operation;
+export function operationFor(event, input, workflowRef) {
+  return authorization.operationFor(event, input, workflowRef, "dev");
 }
 
 export function assertScope(id, config) {
@@ -44,6 +43,7 @@ export function summarizePlan(plan, config) {
       if (resource.change.after?.[key]) assertScope(resource.change.after[key], config);
     }
     if (config.operation === "destroy") assert.ok(actions.every((a) => ["delete", "no-op"].includes(a)), "Destroy plans may only delete this workload's managed resources");
+    else assert.ok(!actions.includes("delete"), "Deletion or replacement requires separately authorized cleanup, never an ordinary deployment");
     const action = actions.includes("create") && actions.includes("delete") ? "replace" : actions[0] === "no-op" ? "noChange" : actions[0];
     totals[action] += 1;
     if (action !== "noChange") rows.push({ address: resource.address, action });
@@ -58,7 +58,7 @@ export function planBinding(config, lockText, moduleLockText, inputsText) {
   assert.ok(OPERATIONS.has(config.operation));
   assert.equal(config.root, "environments/dev");
   assert.equal(config.environment, "dev");
-  for (const field of ["runId", "runAttempt", "stateAccount", "stateContainer", "stateKey", "tenant", "planClientId", "applyClientId", "resourceGroup"]) assert.ok(typeof config[field] === "string" && config[field].length > 0, `Missing ${field}`);
+  for (const field of ["repositoryId", "workflowRef", "runId", "runAttempt", "stateAccount", "stateContainer", "stateKey", "stateLockId", "tenant", "planClientId", "applyClientId", "resourceGroup"]) assert.ok(typeof config[field] === "string" && config[field].length > 0, `Missing ${field}`);
   assert.notEqual(config.planClientId, config.applyClientId, "Plan and apply identities must be different");
   return { ...config, terraform: TERRAFORM_VERSION, provider: PROVIDER_VERSION, providerLock: textHash(lockText), moduleLock: textHash(moduleLockText), inputs: textHash(inputsText) };
 }
@@ -74,24 +74,17 @@ export function verifyPlan({ manifest, manifestBytes, expectedManifestHash, plan
   assert.equal(bytesHash(manifestBytes), expectedManifestHash, "Plan manifest was altered");
   assert.deepEqual(manifest, JSON.parse(manifestBytes.toString("utf8")), "Manifest object differs from its authenticated bytes");
   assert.equal(manifest.schemaVersion, 1);
-  assert.deepEqual(manifest.binding, binding, "Commit/run/attempt/state/dependencies/inputs identity mismatch; create a new plan and approval");
-  assert.equal(currentSha, binding.sha, "Protected main has moved; replan and obtain fresh approval");
+  assert.deepEqual(manifest.binding, binding, "Repository/workflow/commit/run/attempt/state/dependencies/inputs identity mismatch; create a new protected-main run and saved plan");
+  assert.equal(currentSha, binding.sha, "Protected main has moved; start a fresh protected-main run and saved plan");
   assert.equal(bytesHash(planBytes), expectedPlanHash, "Saved plan was altered");
   assert.equal(manifest.planSha256, expectedPlanHash);
   const created = Date.parse(manifest.createdAt);
-  assert.ok(Number.isFinite(created) && created <= now && now - created <= MAX_PLAN_AGE_MS, "Plan is stale or has an invalid timestamp; replan and obtain fresh approval");
+  assert.ok(Number.isFinite(created) && created <= now && now - created <= MAX_PLAN_AGE_MS, "Plan is stale or has an invalid timestamp; create a new saved plan");
   planExit(manifest.exitCode);
   assert.ok(["deploy", "destroy"].includes(binding.operation), "Plan-only, drift and follow-up operations cannot apply");
   return true;
 }
 
-export function assertEnvironmentProtection(environment, branches, requireApproval) {
-  assert.equal(environment.deployment_branch_policy?.custom_branch_policies, true, "Use an explicit main-only environment deployment policy");
-  assert.equal(environment.deployment_branch_policy?.protected_branches, false);
-  assert.ok(branches.length === 1 && branches[0].name === "main" && branches[0].type === "branch", "Only the main branch may access trusted environments");
-  if (requireApproval) {
-    const rule = environment.protection_rules?.find((item) => item.type === "required_reviewers");
-    assert.ok(rule?.reviewers?.length > 0 && rule.prevent_self_review === true, "Independent required reviewers and prevention of self-review must be available and enabled");
-    assert.equal(environment.can_admins_bypass, false, "Environment administrator bypass must be disabled");
-  }
+export function assertEnvironmentProtection(environment, branches) {
+  return authorization.assertEnvironmentProtection(environment, branches);
 }

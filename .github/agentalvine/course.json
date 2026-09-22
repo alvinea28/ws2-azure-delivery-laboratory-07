@@ -15,13 +15,13 @@
     "D2.7 live deployment, follow-up and cleanup"
   ],
   "duration": "45–60 minutes offline; live timing depends on instructor readiness",
-  "description": "No earlier laboratory required for offline study or tests. A complete module and verified local snapshot are included. Live steps require a private instructor-approved copy, protected main, sandbox and independent reviewers.",
+  "description": "Required hands-on: construct the canonical GitHub Actions workflow in VS Code and map identity/state with credential-free checks. No earlier laboratory or Azure account is needed offline. Only the exact approved private copy can use protected-main automatic exact-plan apply after owner scope, budget, lifetime, bootstrap and real readiness checks; no manual deployment reviewer. Public templates and unapproved copies cannot deploy.",
   "nextRepository": "alvinea28/ws2-operations-capstone-laboratory-08",
-  "completion": "Real plan, approved apply, no-change and scoped destroy jobs were observed; the preparation note alone could not complete this lab. A baseline run is not proof of a later capstone revision. Return here after Lab 8 for newly reviewed capstone deployment, follow-up and cleanup in the same single-writer repository. Every laboratory is independent; the catalogue order is a learning recommendation, not a requirement to create or finish another repository.",
+  "completion": "The educational observer found successful named plan, automatic exact-plan apply, fresh no-change and separately authorized cleanup jobs at the applicable revisions. It does not independently verify Azure configuration or resource absence, and progress is not Azure authorization. The preparation note alone cannot complete live steps; a baseline run is not proof of a later capstone revision. Return here after Lab 8 for newly reviewed capstone deployment, follow-up and dedicated owner-authorized cleanup in the same single-writer repository. Every laboratory is independent; the catalogue order is a learning recommendation, not a requirement to create or finish another repository.",
   "steps": [
     {
       "id": "1",
-      "title": "Map identity and state without enabling Azure",
+      "title": "Construct Actions and map identity/state offline",
       "lesson": ".github/steps/01.md",
       "requiresCommit": true,
       "checks": [
@@ -61,7 +61,7 @@
     },
     {
       "id": "3",
-      "title": "Review and independently approve exact-plan deployment",
+      "title": "Explain and observe automatic exact-plan deployment",
       "lesson": ".github/steps/03.md",
       "requiresCommit": true,
       "checks": [
@@ -72,7 +72,8 @@
             "fresh plan",
             "digest",
             "2 hours",
-            "independent reviewer"
+            "automatic exact-plan apply",
+            "separate cleanup authorization"
           ],
           "notContains": [
             "TODO"
@@ -83,7 +84,7 @@
           "file": "delivery.yml",
           "jobs": [
             "Trusted dev plan",
-            "Apply reviewed dev plan"
+            "Apply exact dev saved plan"
           ]
         }
       ]
@@ -106,16 +107,16 @@
     },
     {
       "id": "5",
-      "title": "Review scoped destruction and retain shared resources",
+      "title": "Observe separately authorized cleanup and retain shared resources",
       "lesson": ".github/steps/05.md",
       "requiresCommit": false,
       "checks": [
         {
           "kind": "trusted-run",
-          "file": "delivery.yml",
+          "file": "cleanup.yml",
           "jobs": [
             "Trusted dev plan",
-            "Destroy reviewed dev plan"
+            "Apply exact authorized dev destroy plan"
           ]
         }
       ]

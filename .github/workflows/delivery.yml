@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: Explicit no-change confirmation or independently approved cleanup
+        description: Explicit no-change confirmation only; cleanup has its own authorized workflow
         type: choice
-        options: [followup, destroy]
+        options: [followup]
         default: followup
   schedule:
     - cron: '17 2 * * 2'
@@ -20,6 +20,7 @@ concurrency:
 env:
   WORKSHOP_AZURE_ENABLED: ${{ vars.WORKSHOP_AZURE_ENABLED }}
   REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+  REPOSITORY_TEMPLATE: ${{ github.event.repository.is_template }}
   ARM_USE_OIDC: "true"
   ARM_USE_AZUREAD: "true"
   ARM_USE_CLI: "false"
@@ -30,17 +31,19 @@ env:
   STATE_STORAGE_ACCOUNT: ${{ vars.STATE_STORAGE_ACCOUNT }}
   STATE_CONTAINER: ${{ vars.STATE_CONTAINER }}
   STATE_KEY: ${{ vars.STATE_KEY }}
+  WS2_STATE_LOCK_ID: ${{ vars.WS2_STATE_LOCK_ID }}
   WORKLOAD_RG: ${{ vars.WORKLOAD_RG }}
   WORKLOAD_INPUTS_JSON: ${{ vars.WORKLOAD_INPUTS_JSON }}
 jobs:
   preflight:
-    name: Verify instructor gate configuration
+    name: Verify scoped dev deployment policy
     if: vars.WORKSHOP_AZURE_ENABLED == 'true' && !github.event.repository.is_template && github.event.repository.private && github.ref == 'refs/heads/main' && github.ref_protected
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
       actions: read
+      pull-requests: read
     outputs:
       operation: ${{ steps.policy.outputs.operation }}
       module_owner: ${{ steps.policy.outputs.module_owner }}
@@ -53,29 +56,17 @@ jobs:
       - name: Fail closed when real protections are unavailable
         id: policy
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          REQUESTED_OPERATION: ${{ inputs.operation }}
-          STATE_LOCK_ID: ${{ vars.WS2_STATE_LOCK_ID }}
         with:
           script: |
+            const {operation} = await require('./scripts/approval.cjs')({github,context,core,phase:'preflight'});
             const fs = require('node:fs');
             const {pathToFileURL} = require('node:url');
             const {resolve} = require('node:path');
-            const policy = await import(pathToFileURL(resolve('scripts/plan-policy.mjs')).href);
+            const delivery = await import(pathToFileURL(resolve('scripts/delivery.mjs')).href);
             const snapshot = await import(pathToFileURL(resolve('scripts/module-snapshot.mjs')).href);
-            if (!context.payload.repository.private) throw new Error('Private saved-plan storage required');
-            if (process.env.GITHUB_RUN_ATTEMPT !== '1') throw new Error('Do not rerun credentialled jobs: dispatch a new run for a fresh plan and approval');
-            if (!/^[a-zA-Z0-9-]{3,80}$/.test(process.env.STATE_LOCK_ID || '')) throw new Error('Configure a single-writer state concurrency ID');
-            const branch = (await github.rest.repos.getBranch({...context.repo, branch:'main'})).data;
-            if (!branch.protected || branch.commit.sha !== context.sha) throw new Error('Only current protected main is allowed');
-            for (const name of ['dev-plan','dev-apply']) {
-              const environment = (await github.rest.repos.getEnvironment({...context.repo, environment_name:name})).data;
-              const branches = await github.paginate(github.rest.repos.listDeploymentBranchPolicies, {...context.repo, environment_name:name, per_page:100});
-              policy.assertEnvironmentProtection(environment, branches, name === 'dev-apply');
-            }
+            if (!/^[a-zA-Z0-9-]{3,80}$/.test(process.env.WS2_STATE_LOCK_ID || '')) throw new Error('Configure a single-writer state concurrency ID');
+            delivery.configuration({...process.env, OPERATION: operation});
             const lock = snapshot.validateLock(JSON.parse(fs.readFileSync('module-lock.json','utf8')), snapshot.moduleSource(fs.readFileSync('environments/dev/main.tf','utf8')));
-            const operation = policy.operationFor(context.eventName, process.env.REQUESTED_OPERATION);
-            core.setOutput('operation',operation);
             core.setOutput('module_owner',lock.repository.split('/')[0]);
             core.setOutput('module_repo',lock.repository.split('/')[1]);
   validation:
@@ -110,6 +101,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      actions: read
+      pull-requests: read
       id-token: write
     env:
       ARM_CLIENT_ID: ${{ vars.AZURE_PLAN_CLIENT_ID }}
@@ -124,6 +117,11 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Verify current main and same-run validation
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require('./scripts/approval.cjs')({github,context,core,phase:'plan'});
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.16.0
@@ -161,7 +159,7 @@ jobs:
         if: always()
         run: node scripts/delivery.mjs clean
   apply:
-    name: Apply reviewed dev plan
+    name: Apply exact dev saved plan
     needs: [preflight, plan]
     if: needs.preflight.outputs.operation == 'deploy' && needs.plan.result == 'success'
     runs-on: [self-hosted, linux, x64, ws2-trusted]
@@ -191,13 +189,13 @@ jobs:
         with:
           name: ${{ needs.plan.outputs.artifact }}
           path: .workshop/sealed
-      - name: Confirm current main and independently approved run
+      - name: Verify scoped authorization and current main
         id: approval
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await require('./scripts/approval.cjs')({github,context,core});
-      - name: Decrypt only after independent environment approval
+      - name: Decrypt only after authorization
         env:
           PLAN_DECRYPTION_PRIVATE_KEY: ${{ secrets.PLAN_DECRYPTION_PRIVATE_KEY }}
         run: node scripts/plan-envelope.mjs open
@@ -217,64 +215,6 @@ jobs:
           CURRENT_MAIN_SHA: ${{ steps.approval.outputs.main_sha }}
           GH_READ_TOKEN: ${{ github.token }}
         run: node scripts/delivery.mjs apply
-      - if: always()
-        run: node scripts/delivery.mjs clean
-  destroy:
-    name: Destroy reviewed dev plan
-    needs: [preflight, plan]
-    if: needs.preflight.outputs.operation == 'destroy' && needs.plan.result == 'success'
-    runs-on: [self-hosted, linux, x64, ws2-trusted]
-    environment: dev-apply
-    timeout-minutes: 35
-    permissions:
-      contents: read
-      actions: read
-      pull-requests: read
-      id-token: write
-    env:
-      ARM_CLIENT_ID: ${{ vars.AZURE_APPLY_CLIENT_ID }}
-      OPERATION: destroy
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.16.0
-      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
-        with:
-          terraform_version: 1.16.1
-          terraform_wrapper: false
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: ${{ needs.plan.outputs.artifact }}
-          path: .workshop/sealed
-      - id: approval
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            await require('./scripts/approval.cjs')({github,context,core});
-      - name: Decrypt only after independent cleanup approval
-        env:
-          PLAN_DECRYPTION_PRIVATE_KEY: ${{ secrets.PLAN_DECRYPTION_PRIVATE_KEY }}
-        run: node scripts/plan-envelope.mjs open
-      - id: module
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.MODULE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.MODULE_APP_PRIVATE_KEY }}
-          owner: ${{ needs.preflight.outputs.module_owner }}
-          repositories: ${{ needs.preflight.outputs.module_repo }}
-          permission-contents: read
-      - name: Verify and apply the reviewed destroy plan only
-        env:
-          MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
-          EXPECTED_PLAN_HASH: ${{ needs.plan.outputs.plan_sha256 }}
-          EXPECTED_MANIFEST_HASH: ${{ needs.plan.outputs.manifest_sha256 }}
-          CURRENT_MAIN_SHA: ${{ steps.approval.outputs.main_sha }}
-          GH_READ_TOKEN: ${{ github.token }}
-        run: node scripts/delivery.mjs destroy
       - if: always()
         run: node scripts/delivery.mjs clean
   followup:

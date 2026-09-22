@@ -3,7 +3,7 @@
 > [!WARNING]
 > **INSTRUCTOR ONLY; PRIVATE copy; `WORKSHOP_AZURE_ENABLED=false`.**
 > No authoring Azure/identity/state/subscription operations. Future verification
-> needs independent authorization, not Copilot/AgentAlvine.
+> needs explicit owner scope/bootstrap authorization, not Copilot/AgentAlvine.
 
 **Setup:** [start-here.md](start-here.md) · [azure-setup.md](azure-setup.md) · [instructor-preflight.md](instructor-preflight.md)
 
@@ -91,14 +91,18 @@ manual Blob edits/disabled locks.
 
 `MODULE_APP_CLIENT_ID`/`MODULE_APP_PRIVATE_KEY`: GitHub read transport, even public;
 not Entra, unnecessary offline. `PLAN_ENCRYPTION_PUBLIC_KEY` encrypts;
-`PLAN_DECRYPTION_PRIVATE_KEY`: **dev-apply only** + independent human escrow.
+`PLAN_DECRYPTION_PRIVATE_KEY`: **dev-apply only**; any owner inspection/recovery escrow
+is separately controlled, not a deployment reviewer gate.
 [Locations](delivery-configuration.md); [review](plan-review.md): **2-hour validity / 1-day retention**,
 and retention never extends validity.
 
 ## 8. Acceptance and source attribution
 
 Missing scope/gates/connectivity → **pending**; instructor escalation, never broader access.
-Independent review, no self-review/admin bypass. **Full workload cleanup mandatory**;
+Both environments remain main-only with **no Required reviewers** and no admin
+bypass; no manual deployment reviewer. **Full workload cleanup mandatory** through
+the [dedicated explicitly admin-authorized workflow](../.github/steps/05.md), never
+ordinary main. Same state/concurrency/environments/identities;
 retain shared RG/backend/identities/roles/runner with owners. IDs/evidence private.
 
 [Delivery](../scripts/delivery.mjs), [policy](../scripts/plan-policy.mjs),

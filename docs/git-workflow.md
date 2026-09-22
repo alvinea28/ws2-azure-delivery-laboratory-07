@@ -93,12 +93,13 @@ git rev-parse HEAD
 2. Set **base** to the actual default, normally `dev`, and **compare** to your task branch. Review files, add a title and brief description of changes/checks/limitations, then **Create pull request**; use **Create draft pull request** when required.
 3. **Expected:** the correct same-copy comparison and requested draft/ready state.
 
-**Protected live exception:** Lab 07 delivery targets only instructor-prepared protected `main` with its [identity, backend, runner and independent encrypted-plan approvals](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/docs/delivery-configuration.md). Missing readiness means **stay offline**; do not create unprotected `main`, substitute `dev`, enable Azure or rerun a live job. This exception does not change dev-only template maintenance.
+**Protected live exception:** Lab 07 delivery targets only owner-prepared protected main with its [scoped authorization, OIDC, backend, runner and encrypted exact plans](delivery-configuration.md). Missing main/readiness means **stay offline**: no PR into a nonexistent branch, no creation while unready, dev substitution, enablement or live rerun. Only the owner establishes protected main while disabled after baseline/readiness review. Public-template maintenance remains dev-only.
 
 For the **source PR**, use the Lab 07 [author-merge policy](pr-author-merge.md):
 PR required, zero approving PR reviews, strict passing checks and conversations
-resolved. This removes only the separate PR-reviewer dependency, never the
-independent Azure environment reviewer.
+resolved. No manual deployment reviewer is required. Once ready/enabled, main push
+validates, saves/encrypts and automatically applies the exact same-run plan. Scope,
+budget, bootstrap and separate cleanup authorizations remain owner responsibilities.
 
 ![GitHub reference showing Compare and pull request](images/github-pull-request.webp)
 
@@ -107,7 +108,7 @@ independent Azure environment reviewer.
 ## Obtain a real review and continue
 
 1. Open **Files changed** and inspect your own diff and **current-head checks**. Under this Lab 07 [author-merge policy](pr-author-merge.md), approving PR reviews are **0**: resolve conversations and merge with your own account when the required checks pass. This is self-inspection, **not self-approval**; GitHub does not allow approving your own PR. Other labs and organization policies are not changed by this rule.
-2. If repository policy requires human approval, request an eligible nonauthor and wait. Address feedback on the same task branch and obtain any required fresh approval after edits. Do not impersonate reviewers, substitute AI approval, disable checks, change organization policy or use an administrator bypass.
+2. Address feedback on the same task branch and obtain fresh current-head checks after edits. If effective rules conflict with the approved scoped policy, stop for owner reconciliation, not a learner workaround. Do not impersonate reviewers, substitute AI authorization, disable checks, change organization policy or use administrator bypass.
 3. When the task requires merging and every enforced check/approval is satisfied, choose the permitted merge method and confirm the target/revision. **Expected:** a real merged PR, not merely a closed one. Refresh the same Exercise.
 4. With committed work and a clean tree, select the default branch and **Pull** before starting the next task.
 
@@ -119,4 +120,4 @@ independent Azure environment reviewer.
 | --- | --- |
 | Push rejected/conflict | Preserve work; inspect [pull/push recovery](troubleshooting.md#pull-or-push-is-rejected) |
 | Old/missing check or pending gate | Check the latest head and [PR feedback](troubleshooting.md#a-pr-or-progress-gate-remains-pending); never bypass it |
-| Live Lab 07 approval unavailable | Leave live work pending; offline progress is not cloud authorization |
+| Live scope/bootstrap/configuration unavailable | Leave live work pending; offline progress is not Azure authorization. Dedicated cleanup requires separate explicit current-admin authorization/dispatch, never an ordinary main push |

@@ -5,6 +5,7 @@ import { resolve, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { bytesHash, moduleSource, validateLock, verifyInstalledModule } from "./module-snapshot.mjs";
 import { assertScope, planBinding, makeManifest, planExit, summarizePlan, verifyPlan } from "./plan-policy.mjs";
+import authorization from "./deployment-authorization.cjs";
 
 const root = "environments/dev";
 const privateDir = ".workshop/private";
@@ -23,8 +24,12 @@ export function configuration(env) {
   assert.equal(env.GITHUB_REF, "refs/heads/main", "Only protected main is deployable");
   assert.equal(env.GITHUB_REF_PROTECTED, "true", "Protect main before enabling delivery");
   assert.equal(env.REPOSITORY_PRIVATE, "true", "Saved plans require the approved private repository");
-  assert.equal(env.GITHUB_RUN_ATTEMPT, "1", "Dispatch a new run; job reruns cannot reuse an earlier approval");
+  assert.equal(env.REPOSITORY_TEMPLATE, "false", "Templates must never deploy");
+  const profile = authorization.assertRepository({ id: Number(env.GITHUB_REPOSITORY_ID), full_name: env.GITHUB_REPOSITORY, private: env.REPOSITORY_PRIVATE === "true", is_template: env.REPOSITORY_TEMPLATE !== "false" }, "dev");
+  assert.equal(env.GITHUB_REPOSITORY_ID, String(profile.id), "Unapproved immutable repository identity");
+  assert.equal(env.GITHUB_RUN_ATTEMPT, "1", "Use a fresh run; credentialled job reruns are not allowed");
   assert.ok(["push", "workflow_dispatch", "schedule"].includes(env.GITHUB_EVENT_NAME));
+  assert.equal(env.OPERATION, authorization.operationFor(env.GITHUB_EVENT_NAME, env.OPERATION, env.GITHUB_WORKFLOW_REF, "dev"), "Operation differs from trusted workflow/event");
   assert.equal(env.ARM_USE_OIDC, "true");
   assert.equal(env.ARM_USE_AZUREAD, "true");
   for (const key of ["ARM_CLIENT_SECRET", "ARM_CLIENT_SECRET_FILE_PATH", "ARM_CLIENT_CERTIFICATE", "ARM_CLIENT_CERTIFICATE_PATH", "ARM_CLIENT_CERTIFICATE_PASSWORD", "ARM_ACCESS_KEY", "ARM_SAS_TOKEN", "ARM_USE_MSI", "ARM_USE_AKS_WORKLOAD_IDENTITY", "ARM_OIDC_TOKEN", "ARM_OIDC_TOKEN_FILE_PATH", "ARM_CLIENT_ID_FILE_PATH", "ARM_TENANT_ID_FILE_PATH", "TF_DATA_DIR", "TF_WORKSPACE"]) assert.ok(!env[key], `Remove ambient ${key}; only the explicit workshop OIDC/default-state configuration is allowed`);
@@ -32,6 +37,7 @@ export function configuration(env) {
   assert.match(env.STATE_CONTAINER || "", /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/);
   assert.match(env.STATE_KEY || "", /^[a-zA-Z0-9][a-zA-Z0-9_./-]{0,200}\.tfstate$/);
   assert.ok(!env.STATE_KEY.split("/").includes(".."));
+  assert.match(env.WS2_STATE_LOCK_ID ?? "", /^[a-zA-Z\d-]{3,80}$/);
   let inputs;
   try { inputs = JSON.parse(env.WORKLOAD_INPUTS_JSON); } catch { throw new Error("Configure the instructor-approved non-secret WORKLOAD_INPUTS_JSON variable"); }
   assert.ok(inputs && !Array.isArray(inputs) && Object.keys(inputs).every((key) => allowedVars.has(key)));
@@ -40,12 +46,13 @@ export function configuration(env) {
   assert.match(env.WORKLOAD_RG || "", /^[a-zA-Z0-9_().-]{1,90}$/);
   const config = {
     repository: env.GITHUB_REPOSITORY, sha: env.GITHUB_SHA,
+    repositoryId: env.GITHUB_REPOSITORY_ID, workflowRef: env.GITHUB_WORKFLOW_REF,
     runId: env.GITHUB_RUN_ID, runAttempt: env.GITHUB_RUN_ATTEMPT,
     root, environment: "dev", operation: env.OPERATION,
     subscription: env.ARM_SUBSCRIPTION_ID, tenant: env.ARM_TENANT_ID,
     planClientId: env.PLAN_CLIENT_ID, applyClientId: env.APPLY_CLIENT_ID,
     resourceGroup: env.WORKLOAD_RG, stateAccount: env.STATE_STORAGE_ACCOUNT,
-    stateContainer: env.STATE_CONTAINER, stateKey: env.STATE_KEY,
+    stateContainer: env.STATE_CONTAINER, stateKey: env.STATE_KEY, stateLockId: env.WS2_STATE_LOCK_ID,
   };
   return { config, inputsText: `${JSON.stringify(inputs, null, 2)}\n` };
 }
@@ -85,7 +92,7 @@ export async function currentMain(config, request = fetch) {
   assert.ok(response.ok, "Cannot recheck protected main immediately before apply");
   const branch = await response.json();
   assert.equal(branch.protected, true);
-  assert.equal(branch.commit.sha, config.sha, "Main changed during initialization; regenerate the plan and independent approval");
+  assert.equal(branch.commit.sha, config.sha, "Main changed during initialization; start a fresh protected-main run and saved plan");
   return branch.commit.sha;
 }
 
@@ -134,7 +141,7 @@ export async function deliver(phase) {
     await writeFile(manifestPath, manifestBytes, { mode: 0o600 });
     await outputs({ plan_sha256: manifest.planSha256, manifest_sha256: bytesHash(manifestBytes), exitcode: result.status, operation: config.operation, artifact: `ws2-dev-${config.runId}-${config.runAttempt}` });
     const rows = summary.resources.map((item) => `| \`${item.address}\` | ${item.action} |`).join("\n");
-    await appendFile(process.env.GITHUB_STEP_SUMMARY, `## AgentAlvine · trusted dev ${config.operation}\n\n**${status}** · source ${config.sha} · run ${config.runId}/${config.runAttempt}\n\nModule revision: ${moduleLock.revision}; state: ${config.stateAccount}/${config.stateContainer}/${config.stateKey}.\n\nPlan SHA-256: ${manifest.planSha256}\n\nManifest SHA-256: ${bytesHash(manifestBytes)}\n\nReview artifact ws2-dev-${config.runId}-${config.runAttempt}. Private repository readers can download it; retention 1 day; maximum plan age 2 hours.\n\nCreates ${summary.totals.create}; updates ${summary.totals.update}; deletes ${summary.totals.delete}; replacements ${summary.totals.replace}. Output-only changes may also occur.\n\n| Managed address | Action |\n| --- | --- |\n${rows || "| No managed-resource changes | no-change |"}\n\nReviewers must inspect the restricted exact plan for property-level changes and outputs; this sanitized inventory does not replace that review. No raw values, state or plan JSON are published.\n`);
+    await appendFile(process.env.GITHUB_STEP_SUMMARY, `## AgentAlvine · trusted dev ${config.operation}\n\n**${status}** · source ${config.sha} · run ${config.runId}/${config.runAttempt}\n\nModule revision: ${moduleLock.revision}; state: ${config.stateAccount}/${config.stateContainer}/${config.stateKey}.\n\nPlan SHA-256: ${manifest.planSha256}\n\nManifest SHA-256: ${bytesHash(manifestBytes)}\n\nEncrypted artifact ws2-dev-${config.runId}-${config.runAttempt}. Private repository readers can download it; retention 1 day; maximum plan age 2 hours.\n\nCreates ${summary.totals.create}; updates ${summary.totals.update}; deletes ${summary.totals.delete}; replacements ${summary.totals.replace}. Output-only changes may also occur.\n\n| Managed address | Action |\n| --- | --- |\n${rows || "| No managed-resource changes | no-change |"}\n\nOnly this run's policy-verified exact saved plan may be applied; no human deployment review is required or inferred. Cleanup requires separate explicit authorization. No raw values, state or plan JSON are published.\n`);
   } else if (["apply", "destroy"].includes(phase)) {
     // Recheck integrity/age after downloads/init, immediately before mutation.
     const freshMain = await currentMain(config);
@@ -144,7 +151,7 @@ export async function deliver(phase) {
     if (phase === "destroy") {
       const state = (await terraform(["state", "list"])).stdout.trim();
       assert.equal(state, "", "Workload state is not empty; keep cleanup open");
-      await appendFile(process.env.GITHUB_STEP_SUMMARY, "## AgentAlvine · scoped cleanup confirmed\n\nThe reviewed destroy plan was applied and the workload state has no managed addresses. Instructor-owned resource group, backend, identities and runner were not managed by this root. The instructor must confirm retained-resource owners and final Azure inventory; do not delete shared infrastructure.\n");
+      await appendFile(process.env.GITHUB_STEP_SUMMARY, "## AgentAlvine · scoped cleanup confirmed\n\nThe separately authorized exact destroy plan was applied and the workload state has no managed addresses. Instructor-owned resource group, backend, identities and runner were not managed by this root. The instructor must confirm retained-resource owners and final Azure inventory; do not delete shared infrastructure.\n");
     } else {
       const all = JSON.parse((await terraform(["output", "-json"])).stdout);
       for (const key of ["vnet_id", "nsg_id"]) assertScope(all[key]?.value, config);
@@ -154,7 +161,7 @@ export async function deliver(phase) {
       }
       assert.deepEqual(Object.keys(all.subnet_ids.value).sort(), Object.keys(JSON.parse(inputsText).subnets).sort());
       const safe = Object.fromEntries(["vnet_id", "subnet_ids", "nsg_id", "association_ids"].map((key) => [key, all[key].value]));
-      await appendFile(process.env.GITHUB_STEP_SUMMARY, `## AgentAlvine · exact plan applied\n\nVerified workload output IDs (not raw state):\n\n\`\`\`json\n${JSON.stringify(safe, null, 2)}\n\`\`\`\n\nRecord independent approval and verify Azure inventory. Dispatch a separate followup operation; no-change has not yet been claimed.\n`);
+      await appendFile(process.env.GITHUB_STEP_SUMMARY, `## AgentAlvine · exact plan applied\n\nVerified workload output IDs (not raw state):\n\n\`\`\`json\n${JSON.stringify(safe, null, 2)}\n\`\`\`\n\nVerify Azure inventory. Dispatch a separate followup operation; no-change has not yet been claimed. Cleanup remains a separately authorized operation.\n`);
     }
   } else throw new Error("Unknown delivery phase");
 }

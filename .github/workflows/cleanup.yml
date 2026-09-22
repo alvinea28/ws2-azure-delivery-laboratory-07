@@ -1,19 +1,13 @@
-name: Trusted dev delivery (instructor enablement required)
+name: Trusted dev cleanup (explicit owner authorization required)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
-      operation:
-        description: Explicit no-change confirmation only; cleanup has its own authorized workflow
-        type: choice
-        options: [followup]
-        default: followup
-  schedule:
-    - cron: '17 2 * * 2'
+      authorization:
+        description: 'destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>'
+        required: true
+        type: string
 permissions: {}
-# GitHub concurrency is repository-scoped. The instructor designates ONE writer
-# repository per state. Blob leases are additional protection, not a replacement.
+# Share delivery serialization, state and identities; never clean up on a push.
 concurrency:
   group: ws2-state-${{ vars.WS2_STATE_LOCK_ID || github.repository }}
   cancel-in-progress: false
@@ -36,7 +30,7 @@ env:
   WORKLOAD_INPUTS_JSON: ${{ vars.WORKLOAD_INPUTS_JSON }}
 jobs:
   preflight:
-    name: Verify scoped dev deployment policy
+    name: Verify separate dev cleanup authorization
     if: vars.WORKSHOP_AZURE_ENABLED == 'true' && !github.event.repository.is_template && github.event.repository.private && github.ref == 'refs/heads/main' && github.ref_protected
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -138,7 +132,7 @@ jobs:
           owner: ${{ needs.preflight.outputs.module_owner }}
           repositories: ${{ needs.preflight.outputs.module_repo }}
           permission-contents: read
-      - name: OIDC init, validate, plan and sanitized review summary
+      - name: OIDC init, validate and exact scoped destroy plan
         id: plan
         env:
           MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
@@ -158,10 +152,10 @@ jobs:
       - name: Remove local sensitive files
         if: always()
         run: node scripts/delivery.mjs clean
-  apply:
-    name: Apply exact dev saved plan
+  destroy:
+    name: Apply exact authorized dev destroy plan
     needs: [preflight, plan]
-    if: needs.preflight.outputs.operation == 'deploy' && needs.plan.result == 'success'
+    if: needs.preflight.outputs.operation == 'destroy' && needs.plan.result == 'success'
     runs-on: [self-hosted, linux, x64, ws2-trusted]
     environment: dev-apply
     timeout-minutes: 35
@@ -172,7 +166,7 @@ jobs:
       id-token: write
     env:
       ARM_CLIENT_ID: ${{ vars.AZURE_APPLY_CLIENT_ID }}
-      OPERATION: deploy
+      OPERATION: ${{ needs.preflight.outputs.operation }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -189,7 +183,7 @@ jobs:
         with:
           name: ${{ needs.plan.outputs.artifact }}
           path: .workshop/sealed
-      - name: Verify scoped authorization and current main
+      - name: Recheck explicit cleanup authorization and current main
         id: approval
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
@@ -207,45 +201,13 @@ jobs:
           owner: ${{ needs.preflight.outputs.module_owner }}
           repositories: ${{ needs.preflight.outputs.module_repo }}
           permission-contents: read
-      - name: Verify exact plan and apply (no implicit replanning)
+      - name: Verify and apply the authorized destroy plan only
         env:
           MODULE_READ_TOKEN: ${{ steps.module.outputs.token }}
           EXPECTED_PLAN_HASH: ${{ needs.plan.outputs.plan_sha256 }}
           EXPECTED_MANIFEST_HASH: ${{ needs.plan.outputs.manifest_sha256 }}
           CURRENT_MAIN_SHA: ${{ steps.approval.outputs.main_sha }}
           GH_READ_TOKEN: ${{ github.token }}
-        run: node scripts/delivery.mjs apply
+        run: node scripts/delivery.mjs destroy
       - if: always()
         run: node scripts/delivery.mjs clean
-  followup:
-    name: Confirm no-change
-    needs: [preflight, plan]
-    if: needs.preflight.outputs.operation == 'followup' && needs.plan.result == 'success'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 2
-    permissions: {}
-    env:
-      PLAN_EXIT: ${{ needs.plan.outputs.exitcode }}
-    steps:
-      - name: Changes must be explained, never reported as no-change
-        run: |
-          test "$PLAN_EXIT" = 0
-          echo 'The separately requested trusted follow-up plan reported no changes.' >> "$GITHUB_STEP_SUMMARY"
-  drift:
-    name: Report drift without applying
-    needs: [preflight, plan]
-    if: needs.preflight.outputs.operation == 'drift' && needs.plan.outputs.exitcode == '2'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      issues: write
-    steps:
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const marker = '<!-- ws2-drift -->';
-            const issues = await github.paginate(github.rest.issues.listForRepo,{...context.repo,state:'open',per_page:100});
-            const existing = issues.find(i => i.user.login === 'github-actions[bot]' && i.body?.includes(marker));
-            const body = `${marker}\n## AgentAlvine · investigate drift\n\nTrusted plan detected changes: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}.\n\nReview the sanitized summary and restricted plan. Explain drift through an issue/PR; do not auto-fix it, broaden roles or disable locks.`;
-            if (existing) await github.rest.issues.createComment({...context.repo,issue_number:existing.number,body});
-            else await github.rest.issues.create({...context.repo,title:'AgentAlvine · dev drift requires review',body});

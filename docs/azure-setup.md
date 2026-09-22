@@ -191,15 +191,21 @@ metadata location is not necessarily the approved workload region.
 | PR checks | No login, OIDC, user tokens, remote state or CLI cache |
 
 Local variables/login do **not** configure Actions or its OIDC workload identity.
-Never copy CLI tokens/caches to GitHub. **Lab 07 live is not solo:** retain the
-[protected delivery configuration and independent approvals](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/docs/delivery-configuration.md).
+Never copy CLI tokens/caches to GitHub. Retain this exact private copy's
+[protected automatic exact-plan configuration](delivery-configuration.md):
+no manual deployment reviewer, but real scope/budget/bootstrap readiness is required.
 
 ## 7. Cleanup, privacy and returning to the Exercise
 
 1. **Live workload cleanup is mandatory:** use the **same approved root/state** and
-    [fresh, independently reviewed saved destroy plan](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/.github/steps/05.md)
-    before moving on. The workflow's `plan -destroy` proposes full destruction; it
-    applies that exact reviewed plan. No ungated local `terraform destroy`, `-target`
+    [separately authorized dedicated cleanup](../.github/steps/05.md)
+    before moving on. The current authenticated repo admin explicitly authorizes
+    owned-scope cleanup and dispatches [cleanup.yml](../.github/workflows/cleanup.yml),
+    required string `authorization` = `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`,
+    no operation input or independent cleanup reviewer. A fresh `plan -destroy`
+    proposes full destruction; same-run validation and exact saved-plan application
+    retain state/concurrency/environments/identities. Ordinary main never cleans up.
+    No ungated local `terraform destroy`, `-target`
     (partial selection), state deletion, or deletion of existing/shared RGs, backends,
     identities or runners. Failed/uncertain cleanup keeps the activity open: escalate.
 2. **Redaction is mandatory before sharing captures:** hide tenant/subscription/client/object

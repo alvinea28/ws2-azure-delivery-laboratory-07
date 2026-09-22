@@ -71,7 +71,7 @@ Reject live-provider substitutions, unlocked dependencies, removed validation, b
 2. Make the smallest permitted edit, save (**Ctrl+S**, macOS **Cmd+S**) and run the [approved checks](toolchain.md#run-only-the-approved-offline-checks) when requested. **Expected:** actual executed tests; zero/skipped tests, citations and old green screenshots are not passes.
 3. Review the full diff before staging, then follow the [Git workflow](git-workflow.md) and current Exercise. Preserve repository instructions; do not accept automatic instruction generation or unrelated rewrites.
 
-Labs **01/05** permit self-inspection and merging an educational PR where repository rules allow; this is **not GitHub self-approval**. Required human approvals cannot be replaced by Copilot. Lab 07's [protected live approvals](https://github.com/alvinea28/ws2-azure-delivery-laboratory-07/blob/dev/docs/delivery-configuration.md) remain independent and mandatory.
+Labs **01/05** permit self-inspection and educational PR merges where rules allow; this is **not GitHub self-approval**. In this exact approved private Lab 07 route, the author may also merge after strict checks and resolved conversations. [Automatic exact-plan delivery](delivery-configuration.md) has no manual deployment reviewer; Copilot/AgentAlvine still cannot supply scope, budget, bootstrap or separate cleanup authorization. The guide observes metadata only, not cloud tokens or execution. Public templates remain inert.
 
 ## Use Workspace settings deliberately
 

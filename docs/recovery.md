@@ -22,6 +22,8 @@ single writer**, protected `main`.
 
 Private **Actions → Trusted dev delivery (instructor enablement required)** → exact
 run → Summary: compare event/operation/SHA/attempt/status; [job map](plan-review.md#1-understand-events-and-operations).
+For cleanup use **Trusted dev cleanup (explicit owner authorization required)**,
+not the delivery menu. Neither path is enabled by this recovery guide.
 Missing summary ≠ no mutation.
 
 ![GitHub reference: Actions tab](images/github-actions.webp)
@@ -52,8 +54,8 @@ repository concurrency cannot exclude other copies.
 | Runner resolver/private DNS/endpoint | Connectivity | Private path; never expose storage |
 | Routes/firewall/endpoint/TLS trust | Timeout | No certificate bypass |
 | Writer/process/state/other copies | Lease | Coordinate; no unlock/break/disabled locking |
-| Same-run/both digests/bindings/age/main | Plan | Fresh plan/review; no artifact substitution/extended validity |
-| Eligible human/history/merged-main PR | Approval | Independent; no self-review/admin/comment substitute |
+| Same-run/both digests/bindings/age/main | Plan | Fresh authorized plan; no artifact substitution/extended validity |
+| Exact private ID/name, live rules, current main/run/SHA/attempt, merged PR, same-run jobs and environments | Scoped authorization | No Required reviewers or admin bypass; no issue/comment substitute |
 | Operations/backend consistency | Partial mutation | Instructor; no blind replay/import/state edits |
 | Properties/outputs | Followup/drift exit 2 | Explain; drift reports, neither applies |
 
@@ -61,12 +63,12 @@ repository concurrency cannot exclude other copies.
 
 ## 5. Handle stale plans and partial mutations differently
 
-**Before mutation:** reviewed correction → **new trusted run/plan/review**. Encrypted
-artifact **1 day** ≠ plan validity **2 hours**. Moved main/expiry invalidates approval;
+**Before mutation:** reviewed correction → **new authorized run/exact plan**. Encrypted
+artifact **1 day** ≠ plan validity **2 hours**. Moved main/expiry invalidates the saved plan;
 apply **exact saved plan**, no implicit replan.
 
 **Possible mutation:** instructor proves stopped writers/consistent backend before
-new plan/independent approval. Git rollback cannot establish Azure state.
+new authorized run/plan. Git rollback cannot establish Azure state.
 
 No local real plan/apply/destroy, state pull/show/download, workspace shortcuts,
 manual Blob edits/disabled locks, or tokens/keys/plaintext plans in chat.
@@ -76,22 +78,28 @@ manual Blob edits/disabled locks, or tokens/keys/plaintext plans in chat.
 **No force-unlock shortcut.** Exceptional orphan-lock/backend-version recovery needs
 explicit incident authorization, all-writers-stopped proof and exact private lock/state
 identification. Owner privately records rationale/outcome; restored state changes
-tracking. Then fresh plan/property review/independent approval.
+tracking. Then a fresh authorized run with property validation and exact-plan application.
 
 ## 7. Correct code through the reviewed Git route
 
 [Git route](git-workflow.md): task branch → author inspection/current checks/resolved
 conversations → [author-merged PR](pr-author-merge.md) → protected `main`. Zero PR
-approvals does not remove independent environment review of the new plan.
+approvals is not self-approval; no manual deployment reviewer is required in this
+exact private route. Missing main/readiness means offline handoff, not inventing a branch.
 Preserve tests/source/lock/vendor/provider/controls; Copilot sees
 sanitized source only.
 
-[New run/independent review](plan-review.md), never **Re-run failed jobs / Re-run all jobs**:
-credentialled attempt **1 only**. Solo Labs 01/05 never relax live approval.
+[New authorized run/exact plan](plan-review.md), never **Re-run failed jobs / Re-run all jobs**:
+credentialled attempt **1 only**. Scope, budget, lifetime and bootstrap authorization
+remain separate from educational progress.
 
 A separately authorized reviewed **main push** creates the fresh deploy run; do not
-dispatch another deploy or invent a fake change just to trigger it. Manual retries
-are limited to fresh followup/destroy requests. If there is no approved recovery
+dispatch another deploy or invent a fake change just to trigger it. Delivery's manual
+menu offers followup only. Cleanup retries require the current authenticated repo
+admin's separate owned-scope authorization and a fresh dispatch of [cleanup.yml](../.github/workflows/cleanup.yml),
+required string `authorization` = `destroy:1379149907:<current full main SHA>:<WS2_STATE_LOCK_ID>`,
+no operation input or independent cleanup reviewer. Admin/actor/sender/trigger IDs,
+current SHA/state and same-run validation/exact destroy plan are checked. If there is no approved recovery
 change/run path, remain blocked with the instructor rather than bypassing freshness.
 
 ## 8. Close only what was actually verified
@@ -101,10 +109,12 @@ change/run path, remain blocked with the instructor rather than bypassing freshn
 | Check repaired revision | Offline proof | Executed positive/rejection passes, not cloud proof |
 | Verify new successful apply/instructor inventory | Deployment | Separate `followup`: exit 0 **and Confirm no-change** success |
 | Record drift cause/impact/owner/decision | Ownership | No automatic fix |
-| New independently approved full destroy, same root/state | Cleanup | Plan/destroy success, empty managed state **and** final private inventory |
+| New separately owner-authorized full cleanup, same root/state | Cleanup | Plan/destroy success, empty managed state **and** final private inventory |
 
 **Full workload cleanup mandatory before live completion; no targets/state deletion.**
 Retain shared RG/backend account/container/identities/roles/runner with owners.
+Cleanup keeps delivery's state/concurrency/environments/identities; ordinary main
+never cleans up and destroy/replacements on regular pushes fail.
 Failed/skipped/uncertain deletion/health stays open; progress ≠ acceptance.
 
 ## Source attribution
